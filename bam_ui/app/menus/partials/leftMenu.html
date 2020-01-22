@@ -1,0 +1,94 @@
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+        <!-- search form -->
+        <form action="#" method="get" class="sidebar-form">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search...">
+                <span class="input-group-btn">
+                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+        </form>
+        <!-- /.search form -->
+        <!-- sidebar menu: : style can be found in sidebar.less -->
+        <ul class="sidebar-menu">
+            <li class="header">MAIN NAVIGATION</li>
+            <li>
+                <a href="/">
+                    <i class="fa fa-home"></i> <span>Home</span>
+                    <i class="fa fa-angle-left pull-right"></i>
+                </a>
+            </li>
+            <li ng-if="!devRole">
+                <a ui-sref="components.hosts">
+                    <i class="fa fa-cloud"></i> <span>Server Manager</span>
+                    <!-- <i class="fa fa-angle-left pull-right"></i> -->
+                </a>
+            </li>
+            <li ng-if="!devRole">
+                <a ui-sref="components.view">
+                    <i class="bgs bgs-sm bgs-package-manager-menu"></i> <span>Package Manager</span>
+                </a>
+            </li>
+            <li ng-if="hideBackupRestore && !devRole">
+                <a ui-sref="components.backupRestoreView">
+                    <i class="fa fa-floppy-o"></i> <span>Backup & Restore</span>
+                </a>
+            </li>
+            <!--<li>
+                <a ui-sref="components.status">
+                    <i class="fa fa-dashboard"></i> <span>Server Status</span>
+                </a>
+            </li> -->
+            <li>
+                <a ui-sref="components.badger">
+                    <i class="bgs bgs-sm bgs-pgbadger-menu">&nbsp;&nbsp;&nbsp;&nbsp;</i> <span>pgBadger Console</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="components.profiler">
+                    <i class="bgs bgs-sm bgs-plprofiler-menu">&nbsp;&nbsp;&nbsp;&nbsp;</i> <span>plProfiler Console</span>
+                </a>
+            </li>
+            <li>
+                <a ui-sref="components.componentLog({component:'pgcli'})">
+                    <i class="fa fa-file-text-o"></i> <span>Log Tailer</span>
+                </a>
+            </li>
+            <!-- <li>
+                <a href="/admin">
+                    <i class="fa fa-paw"></i> <span>Dev Manager </span>
+                </a>
+            </li> -->
+            <li ng-if="hideAwsNav">
+                <a ui-sref="components.awsIntegration">
+                    <i class="bgs bgs-sm bgs-aws-menu"></i> <span>AWS Integration</span>
+                </a>
+            </li>
+            <li ng-if="hideAzureNav">
+                <a ui-sref="components.azureIntegration">
+                    <i class="bgs bgs-sm bgs-azure-menu"></i> <span>Azure Integration</span>
+                </a>
+            </li>
+            <li ng-if="hidevmWareNav">
+                <a ui-sref="components.vmwareIntegration">
+                    <i class="bgs bgs-sm bgs-vmware-menu"></i> <span>VMware Integration</span>
+                </a>
+            </li>
+            <li ng-if="hideBackupRestore && !devRole">
+                <a ui-sref="components.backgroundProcessList">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Job Manager</span>
+                </a>
+            </li>
+            <li ng-if="!devRole">
+                <a ui-sref="components.settingsView">
+                    <i class="fa fa-cog"></i> <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+    <!-- /.sidebar -->
+</aside>

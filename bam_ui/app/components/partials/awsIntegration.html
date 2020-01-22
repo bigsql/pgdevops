@@ -1,0 +1,55 @@
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert($index)" class="uib-text">{{alert.msg}}</uib-alert>
+<section class="content-header">
+     <!-- <server-info-details title="AWS Integration"></server-info-details> -->
+     <div class="components-update-title-wrapper" style="display: unset;">
+	    <form class="form form-inline ">
+            <div class="col-lg-10">
+	        <h1 class="aws-page-head"> &nbsp;&nbsp;<strong>AWS Integration</strong></h1>
+                </div>
+            <div class="col-lg-2 pull-right"><img src="../assets/img/aws_logo.png"></img></div>
+	    </form>
+	</div>
+    <div id="pgcInfoText" class="pull-left"></div>
+</section>
+<section class="content">
+    <div ng-if="loading" class="loadingSpinner">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <div class="row" ng-if="!loading">
+        <div class="col-md-2"></div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" ng-click="discover('aws', 'Discover AWS Postgres RDS', 'db')">
+            <a class="thumbnail">
+                <img class="img-responsive" src="assets/img/rds-search.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Discover PostgreSQL RDS Instances</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole" ng-click="!devRole && createNewRds()">
+            <a class="thumbnail" ng-class="{'div-disabled':devRole}">
+                <img class="img-responsive" src="assets/img/rds-add.png" alt="">
+                <div class="aws-caption break-word">
+                    <h4 class="aws-page-tile-name break-word">Create PostgreSQL RDS Instance</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" ng-click="discover('aws', 'Discover AWS EC2 Instances', 'vm')">
+            <a class="thumbnail">
+                <img class="img-responsive" src="assets/img/ec2-search.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Discover EC2 Instances</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole" ng-click="!devRole && createNewEC2()">
+            <a class="thumbnail" ng-class="{'div-disabled':devRole}">
+                <img class="img-responsive" src="assets/img/ec2-add.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Create EC2 Instance</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</section>

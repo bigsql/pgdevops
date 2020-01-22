@@ -1,0 +1,99 @@
+<section class="content-header">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="4000" close="closeAlert()" class="uib-text">{{alert.msg}}</uib-alert>
+    <h1 class="components-update-title-wrapper">
+        Dashboard
+    </h1>
+</section>
+<section class="content">
+
+    <splash-screen desc="true" ng-if="showSplash"></splash-screen>
+    <div ng-if="bamLoading" style="position: absolute;width: 100px; height: 50px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+
+    <div ng-if="!bamLoading">
+        <div class="row">
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6" ng-if="pgComp && !devRole" ng-repeat="comp in pgComp">
+                <a href="#/details-pg/{{comp.component}}" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/pgdevops-postgres.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">{{comp.component}}</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <a ng-href="{{supported ?'/admin':''}}" ng-click="checkVersion()" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/pgadmin4-web.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">pgAdmin4 Web</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole">
+                <a ui-sref="components.hosts" ng-class="{'div-disabled':devRole}" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/cloud-mgr-lg.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">Server Manager</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole">
+                <a ui-sref="components.view" ng-class="{'div-disabled':devRole}" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/pgdevops-pkg-mgr.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">Package Manager</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6" ng-if="hideBackupRestore" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole">
+                <a ui-sref="components.backupRestoreView" ng-class="{'div-disabled':devRole}" class="thumbnail">
+                    <img class="img-responsive fa fa-floppy-o" src="assets/img/backup_restore.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">Backup & Restore</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <a ui-sref="components.badger" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/pgbadger-lg.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">pgBadger Console</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <a ui-sref="components.profiler" class="thumbnail">
+                    <img class="img-responsive" src="assets/img/pl-profiler-opt-1.png" alt="">
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">plProfiler Console</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <a ui-sref="components.componentLog({component:'pgcli'})" class="thumbnail">
+                    <div style="text-align: center;">
+                        <img class="img-responsive" src="assets/img/pgdevops-logtailer.png" alt="">
+                    </div>
+                    <div class="caption">
+                        <h4 class="home-page-tile-name">Log Tailer</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    <!-- <hr style="background-color: #fff; border-top: 1px solid #8c8b8b; margin-top: 90px;">
+
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Recently Released</h3>
+            </div>
+            <div class="col-md-6">
+                <h3>Documentation</h3>
+            </div>
+        </div>
+
+    </div> -->
+
+</section>

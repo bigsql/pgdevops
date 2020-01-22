@@ -1,0 +1,40 @@
+<form class="form" name="userForm">
+    <div class="col-md-1">
+        <button class="btn btn-default" ng-model="value.id" ng-disabled="value.email == $root.userInfoGlobal.email || value.new" ng-click="deleteUser(value.id)">
+            <i class="fa fa-trash"></i>
+        </button>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <input type="email" ng-disabled="!value.new" ng-model="value.email" name="email" class="form-control" ng-model="main.email" required>
+            <span ng-show = "userForm.email.$error.email"> Invalid Email</span>
+            <!-- ngMessages goes here -->
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <select class="form-control form-control-sm" ng-disabled="value.email == $root.userInfoGlobal.email" ng-model="value.role" ng-change="updateRole()" ng-options="role.id as role.name for (key, role) in roles" required>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-1">
+        <label>
+            <input type="checkbox" ng-model="value.active" ng-disabled="value.email == $root.userInfoGlobal.email" ng-change="updateActive()" ng-checked="value.active">
+            <span class="custom-control-indicator"></span>
+        </label>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input class="form-control" ng-disabled="!value.email && value.email != $root.userInfoGlobal.email" type="password" id="inputPassword" name="password" ng-model="formdata.password" valid-user-password required />
+            <span ng-show="!!userForm.password.$error.invalidLen">Must be 6 characters.</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input class="form-control" ng-disabled="!value.email && value.email != $root.userInfoGlobal.email" type="password" id="password_c" name="password_c" ng-model="formdata.password_c" confirm-password required/>
+        </div>
+        <span ng-show="!userForm.password_c.$error.required && userForm.password_c.$error.noMatch && userForm.password.$dirty">Passwords do not match.</span>
+    </div>
+    <span class="form-actions" ng-show="formSave()">
+    </span>
+</form>

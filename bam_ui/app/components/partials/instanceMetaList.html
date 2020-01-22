@@ -1,0 +1,33 @@
+<div ng-controller="instanceMetaListController">
+    <div>
+        <div><strong> Details :  {{metaListData.instance}}</strong></div>
+    </div>
+    <div class="box-body" >
+    <form class="form-horizontal" id="rds-meta-info-box">
+        <div class="form-group">
+            <label class="col-sm-9 info-label">vCPU </label>
+            <span class="col-sm-3 info-text">
+                <span style="white-space: pre;"><strong>{{metaListData.v_cpu}} vCPU</strong></span>
+            </span>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-9 info-label">Memory </label>
+            <span class="col-sm-3 info-text">
+                <span style="white-space: pre;"><strong>{{metaListData.memory}} GiB</strong></span>
+            </span>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-9 info-label">EBS Optimized </label>
+            <span class="col-sm-3 info-text">
+                <span> <strong>No</strong> </span>
+            </span>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-9 info-label">Network Performanace </label>
+            <span class="col-sm-3 info-text">
+                <span><strong> {{metaListData.network_performance}}</strong></span>
+            </span>
+        </div>
+    </form>
+    </div>
+</div>

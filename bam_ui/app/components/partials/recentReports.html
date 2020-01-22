@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h3 class="modal-title">Recent Reports</h3>
+</div>
+<div class="modal-body">
+        <div ng-if="!showError">
+            <div class="box-header with-border">
+                <div class="col-md-12">
+                    <label>
+                        <input type="checkbox" ng-click="toggleAll()" ng-model="options.master">&nbsp;Report
+                    </label>
+                    <span class="pull-right">
+                        <label>Created on</label>
+                    </span>
+                </div>
+            </div>
+            <div class="box-body" style="max-height: 300px; overflow: auto;">
+                <div class="col-md-12" ng-repeat = "option in files_list">
+                    <label>
+                    <input type="checkbox" ng-model="option.selected" ng-change="optionToggled()">
+                    <span>&nbsp;{{ option.file }}</span>
+                    </label>
+                    &nbsp;&nbsp;<a target="_blank" href="{{ option.file_link }}"><i class="fa fa-external-link"></i></a>
+                    <span class="pull-right">{{ option.mtime }}</span>
+                </div>
+            </div>
+        </div>
+        <div ng-if="showError">
+            You haven't generated any reports.
+        </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default pull-right" ng-click="removeFiles(files_list, false)" ng-if="!showError" ng-disabled="!options.master && !checked" ng-click="deleteReports(files_list, true)">Delete</button>
+</div>

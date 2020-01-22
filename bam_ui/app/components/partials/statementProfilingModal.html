@@ -1,0 +1,27 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h3 class="modal-title">PL/pgSQL Statement Profiling</h3>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" class="uib-text" dismiss-on-timeout="8000">
+        {{alert.msg}}  
+</uib-alert>
+<div class="modal-body">
+<form class="form plProfiler-form">
+    <div class="form-group">
+        <textarea ng-model="pgQuery" class="form-control" placeholder="select plpgsql_function_to_profile(param_1, param_2)"></textarea>
+        <span class="required-plprofiler-form">*</span>
+    </div>
+    <div class="form-group">
+        <input type="text" ng-model="pgTitle" required class="form-control" placeholder="Report Title (Optional)">
+    </div>
+     <div class="form-group">
+        <input type="text" ng-model="pgDesc" class="form-control" placeholder="Report Desc (Optional)">
+    </div>
+</form>
+</div>
+<div class="modal-footer">
+    <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
+    <button type="submit" class="btn btn-primary" ng-disabled="!pgQuery" ng-click="generateReport()">Execute</button>
+</div>

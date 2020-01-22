@@ -1,0 +1,57 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" style="margin-left: 10px;" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <div>
+        <h4 class="modal-title pull-left"> Test Connection </h4>
+    </div>
+</div>
+<div class="modal-body">
+    <uib-alert ng-repeat="alert in alerts" type="{{ alert.type }}" close="closeAlert()"
+           class="uib-text" style="word-wrap: pre;" >{{ alert.msg }}</uib-alert>
+            <form class="form-horizontal">
+                <div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Host : <span class="requiredSymbol">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" ng-model="host" class="form-control" placeholder="host">
+                            {{msg}}
+                        </div>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label class="col-sm-3 control-label">User Name: <span class="requiredSymbol">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" ng-model="user" class="form-control" placeholder="ssh_user">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Password: <span class="requiredSymbol">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="password" ng-model="password" class="form-control" placeholder="password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Key : <span class="requiredSymbol">*</span></label>
+                        <div class="col-sm-9">
+                            <textarea style="height: 200px;" id="ssh_key" ng-model="ssh_key" class="form-control" placeholder="Paste your ssh-key"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Sudo Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" ng-model="ssh_sudo_pwd" class="form-control" placeholder="ssh_sudo_pwd">
+                        </div>
+                        <div class="col-sm-1">
+                            <i tooltip-append-to-body="true" uib-tooltip="Sudo may be required to perform actions such as enabling autostart & installing system-wide components.  If your account does not have the ability to run 'sudo' without a password, enter the 'sudo password' here. If not supplied, you will be prompted for the sudo password when required." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                        </div>
+                    </div> -->
+                    <div class="form-actions">
+                        <div class="text-right">
+                            <button class="btn btn-default" ng-disabled="connecting" ng-click="testCredential()">
+                                <i class="fa fa-spinner fa-pulse" ng-if="connecting"></i> &nbsp;Test Connection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+</div>

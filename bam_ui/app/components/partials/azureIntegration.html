@@ -1,0 +1,55 @@
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert($index)" class="uib-text">{{alert.msg}}</uib-alert>
+<section class="content-header">
+     <!-- <server-info-details title="AWS Integration"></server-info-details> -->
+     <div class="components-update-title-wrapper" style="display: unset;">
+	    <form class="form form-inline ">
+	        <div class="col-lg-10">
+	        <h1 class="aws-page-head"> &nbsp;&nbsp;<strong>Azure Integration</strong></h1>
+                </div>
+            <div class="col-lg-2 pull-right"><img src="../assets/img/azure-logo.png"></img></div>
+	    </form>
+	</div>
+    <div id="pgcInfoText" class="pull-left"></div>
+</section>
+<section class="content">
+    <div ng-if="loading" class="loadingSpinner">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <div class="row" ng-if="!loading">
+        <div class="col-md-2"></div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" ng-click="discover('azure', 'Discover Azure PostgreSQL Instances', 'db')">
+            <a class="thumbnail">
+                <img class="img-responsive" src="assets/img/pg-azure-discovery.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Discover Azure PostgreSQL Instances</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole" ng-click="!devRole && createNewAzureDb()">
+            <a class="thumbnail" ng-class="{'div-disabled':devRole}">
+                <img class="img-responsive" src="assets/img/pg-azure-add.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Create Azure PostgreSQL Instance</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" ng-click="discover('azure', 'Discover Azure VM instances', 'vm')">
+            <a class="thumbnail">
+                <img class="img-responsive" src="assets/img/azure-vm-discovery.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Discover Azure VM instances</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-3 cursor_pointer" uib-tooltip="Disabled due to permissions" tooltip-enable="devRole" ng-click="!devRole && createNewVM()">
+            <a class="thumbnail" ng-class="{'div-disabled':devRole}">
+                <img class="img-responsive" src="assets/img/azure-vm-add.png" alt="">
+                <div class="aws-caption">
+                    <h4 class="aws-page-tile-name">Create Azure VM Instance</h4>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</section>

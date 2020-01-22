@@ -1,0 +1,80 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" style="margin-left: 10px;" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <div>
+        <h4 class="modal-title pull-left"> {{disp_name}} </h4>
+    </div>
+    <div class="pull-right">
+        <label ng-if="showAddSSHHost && !loadingSpinner"><input type="checkbox" name="" ng-model="isAutoRefresh.value" class="form-check-input" id="autoRefreshAction" ng-change="autoRefresh()"> Auto Refresh</label>
+        <button style="margin-left: 20px;" class="btn btn-primary" ng-if="instance == 'db' && showUseConn && rdsList && !noRDS" class="btn btn-primary" ng-disabled="!isAllSelected && !checked" ng-click="createConnPgadmin()">Use Connections</button>
+        <button style="margin-left: 20px;" ng-if="showAddSSHHost && !loadingSpinner" class="btn btn-primary" ng-disabled="vmSelected == -1 || devRole" ng-click="addSSHHost()">Add Managed SSH Host</button>
+    </div>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{ alert.type }}" dismiss-on-timeout="8000" close="closeAlert()"
+           class="uib-text"><span ng-bind-html="alert.msg"></span><a ng-if="labNotEnabled" href="#/components/settings" ng-click="cancel()">settings</a></uib-alert>
+<h5 class="modal-title pull-right" id="refreshCounter" ng-if="showCounter && isAutoRefresh.value && !loadingSpinner">{{autorefreshMsg}} {{counter}} seconds</h5>
+<div class="modal-body">
+    <div class="row" ng-if="!loadingSpinner">
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-xs-12" ng-if="loadingSpinner">
+            <div class="well">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i>&nbsp; {{discoverMsg}}
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-bind="errMsg" ng-if="!loadingSpinner && !rdsList && errMsg">
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-if="addToMetadata">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i> &nbsp; {{addToMetadataMsg}}
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-if="noRDS && !loadingSpinner">
+                <div> {{noInstanceMsg}} </div>
+            </div>
+        </div>
+        <div ng-if="vmList.length > 0 ">
+            <div class="box-body">
+                <div id="serversTable">
+                <div class="component_head_box">
+                    <div class="row">
+                        <div class="col-md-1 col-sm-1 col-xs-1">
+                            <!-- <input type="checkbox" ng-click="toggleAll()" ng-model="isAllSelected" name=""> -->
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-3"><strong>Name</strong></div>
+                        <div class="col-md-2 col-sm-2 col-xs-2"><strong>state</strong></div>
+                        <div class="col-md-3 col-sm-3 col-xs-3"><strong>ID</strong></div>
+                        <div class="col-md-3 col-sm-3 col-xs-3"><strong>Private IP's</strong></div>
+                    </div>
+                </div>
+                <div class="instance-list-body">
+                    <div ng-repeat="vm in vmList" class= "component_box" ng-class-odd="'oddRow'" style="border-bottom: 1px solid #f4f4f4;">
+                        <div class="row">
+                            <div class="col-md-1 col-sm-1 col-xs-1">
+                                <input type="radio" ng-model="vmSelected" ng-change='vmOptionToggled(vm)' name="vmSelect">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3" style="white-space: nowrap;">
+                                {{vm.name}}
+                            </div>
+                            <div class="col-md-2 col-sm-2 col-xs-2" style="white-space: nowrap;">
+                                {{vm.state}}
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3" style="white-space: nowrap;">
+                                {{vm.id}}
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3" ng-pattern='/\d+\.\d+\.\d+\.\d+/' style="white-space: nowrap;">
+                                {{vm.private_ipv4}}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

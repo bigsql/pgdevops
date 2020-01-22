@@ -1,0 +1,157 @@
+<script type="text/ng-template" id="alert.html">
+    <div class="alert" style="background-color:#fa39c3;color:white;" role="alert">
+        <div ng-transclude></div>
+    </div>
+</script>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert($index)" class="uib-text">{{alert.msg}}</uib-alert>
+<section class="content-header">
+     <server-info-details title="Settings"></server-info-details>
+    <div id="pgcInfoText" class="pull-left"></div>
+</section>
+<section class="content">
+    <div class="row">
+    <div ng-if="loading" style="position: absolute;width: 100px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <span ng-if="pgcNotAvailable && !loading" style="text-align: center;"> <h4>{{errorData.msg}}</h4> </span>
+    <div ng-if="!loading && !pgcNotAvailable" class="settingsPageLayout">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-6 col-sm-6 col-xs-6">
+        <div class="box">
+            <div class="box-header with-border">
+                <div class="col-md-12"><h4><strong> PGC Server Info </strong></h4></div>
+            </div>
+            <div>
+                <form class="form-horizontal" id="pgc-info-box">
+                    <div class="form-group">
+                        <div class="col-sm-3 info-label"> <strong> PGC : </strong></div>
+                        <div class="col-sm-9 info-text">v{{pgcInfo.version}} &nbsp; {{pgcInfo.home}}</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3 info-label"> <strong> User &amp; Host : </strong> </div>
+                        <div class="col-sm-9 info-text">{{pgcInfo.user}} &nbsp; {{pgcInfo.host}}</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3 info-label"> <strong> Platform : </strong> </div>
+                        <div class="col-sm-9 info-text">{{pgcInfo.platform}} &nbsp;|&nbsp; {{pgcInfo.os}} &nbsp;|&nbsp; python {{pgcInfo.python_ver}} &nbsp;|&nbsp; pip {{pgcInfo.pip_ver}}</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3 info-label"> <strong> Hardware : </strong> </div>
+                        <div class="col-sm-9 info-text">{{pgcInfo.mem}} GB, {{pgcInfo.cores}} x {{pgcInfo.cpu}}</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3 info-label"> <strong> Repo URL : </strong> </div>
+                        <div class="col-sm-9 info-text">{{pgcInfo.repo}}</div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-6">
+            <div class="box">
+                <div class="box-header with-border">
+                    <div class="col-md-8">
+                        <h4><strong> Check for updates </strong></h4>
+                    </div>
+                    <div class="col-md-4" style="padding: 2px;">
+                        <button type="button" id="check-updates" class="btn btn-default pull-right" id="checkNow" ng-click="open('manual')">Check now</button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <p class="col-md-12 col-xs-12 col-sm-12" ng-if="pgcInfo.last_update_readable" id="last-update-status">The last time you checked for updates was {{pgcInfo.last_update_readable}} ago </p>
+                    <p class="col-md-12 col-xs-12 col-sm-12" ng-if="!lastUpdateStatus" ng-bind="lastUpdateNone"></p>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header with-border">
+                    <div class="col-md-1 col-sm-1 col-xs-1">
+                        <img style="height: 35px;" src="assets/img/cred_manager.png">
+                    </div>
+                    <div class="col-md-7 col-sm-7 col-xs-7"> 
+                        <h4><strong>Credentials </strong></h4>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-4" style="padding: 2px;">
+                        <button type="button" style="width: 97px;" id="manageCredentials" class="btn btn-default pull-right" ui-sref="components.credentials">Manage</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- <div class="col-md-6 col-sm-6 col-xs-6">
+                
+        </div> -->
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="box">
+               <div class="box-header with-border">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <h4>
+                            <strong> OpenSCG Labs </strong>
+                        </h4>
+                    </div>
+                </div> 
+                <div id="serversTableTbody">
+                    <div ng-repeat="lab in lablist" class="row lab_row">
+                        <div class="col-md-3 col-sm-4 col-xs-4">
+                            <div ng-if="lab.enabled=='on' && lab.lab=='dumprest'">
+                                <a ui-sref="components.backupRestoreView">
+                                    <img class="lab-img img-responsive" ng-src="{{ lab.enabled=='on' && lab.enabled_image_url || lab.disabled_image_url}}" err-src="assets/img/component-logos/no_img.png">
+                                </a>
+                            </div>
+                            <div ng-if="lab.enabled=='on' && lab.lab=='multi-host-mgr'">
+                                <a ui-sref="components.hosts">
+                                    <img class="lab-img img-responsive" ng-src="{{ lab.enabled=='on' && lab.enabled_image_url || lab.disabled_image_url}}" err-src="assets/img/component-logos/no_img.png">
+                                </a>
+                            </div>
+                            <div ng-if="lab.enabled=='on' && lab.lab=='aws'">
+                                <a ui-sref="components.awsIntegration">
+                                    <img class="lab-img img-responsive" ng-src="{{ lab.enabled=='on' && lab.enabled_image_url || lab.disabled_image_url}}" err-src="assets/img/component-logos/no_img.png">
+                                </a>
+                            </div>
+                            <div ng-if="(lab.lab!='dumprest' && lab.lab!='multi-host-mgr' && lab.lab!='aws') || lab.enabled!='on'">
+                                <img class="lab-img img-responsive" ng-src="{{ lab.enabled=='on' && lab.enabled_image_url || lab.disabled_image_url}}" err-src="assets/img/component-logos/no_img.png">
+                            </div>
+                        </div>
+                        <div class="col-md-7 col-sm-4 col-xs-4">
+                            <div>
+                                <div>
+                                    <strong ng-if="lab.enabled=='on' && lab.lab=='dumprest'">
+                                        <a ui-sref="components.backupRestoreView">{{lab.disp_name}}</a>
+                                    </strong>
+                                    <strong ng-if="lab.enabled=='on' && lab.lab=='multi-host-mgr'">
+                                        <a ui-sref="components.hosts">{{lab.disp_name}}</a>
+                                    </strong>
+                                    <strong ng-if="lab.enabled=='on' && lab.lab=='aws'">
+                                        <a ui-sref="components.awsIntegration">{{lab.disp_name}}</a>
+                                    </strong>
+                                    <strong ng-if="lab.enabled=='on' && lab.lab=='azure'">
+                                        <a ui-sref="components.azureIntegration">{{lab.disp_name}}</a>
+                                    </strong>
+                                    <strong ng-if="lab.enabled=='on' && lab.lab=='vmware'">
+                                        <a ui-sref="components.vmwareIntegration">{{lab.disp_name}}</a>
+                                    </strong>
+                                    <strong ng-if="(lab.lab!='dumprest' && lab.lab!='multi-host-mgr' &&  lab.lab!='aws' && lab.lab!='azure' && lab.lab!='vmware') || lab.enabled!='on'">{{lab.disp_name}}</strong>
+                                </div>
+                                <div class="labDescription">{{lab.credit_to}}</div>
+                            </div>
+                            <div class="labDescription" ng-bind-html="lab.markdownDesc"></div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 col-xs-4">
+                            <label>
+                                <input type="radio" id="{{lab.lab}}-enable" ng-model="lab.enabled" value="on" name="{{lab.lab}}" ng-change="changeSetting(lab.lab, 'on', lab.disp_name)"> 
+                                Enable
+                            </label><br \>
+                            <label><input type="radio" id="{{lab.lab}}-disable" ng-model="lab.enabled" value="" name="{{lab.lab}}" ng-change="changeSetting(lab.lab, 'off', lab.disp_name)"> Disable</label>
+                            <div id="email-feedback">
+                                <a href="" ng-click="openFeedbackForm(lab.lab, lab.disp_name)">Email Feedback</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>

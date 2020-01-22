@@ -1,0 +1,42 @@
+<div class="uib-text" uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+    <div ng-bind-html="alert.msg"></div>
+</div>
+<div class="modal-header">
+    <span ng-bind-html="modalTitle"></span>
+</div>
+<div class="modal-body">
+<span ng-bind-html="modelBody"></span>
+
+<div id="dep_stats">
+    <div ng-show="component.installationStatus == 'install'">
+        Installed Successfully
+    </div>
+    <div ng-show="component.installation != undefined || component.spinner" style="width:100%;height:auto">
+       <div>
+        <div ng-show="component.installation && !component.installationStart.status"><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>Installing..</b></div>
+          <span ng-show="component.spinner"><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>{{component.spinner}}</b></span>
+            <div style="margin-left:10px;margin-top:20px" ng-show="component.installationDependents != undefined"><i class="fa fa-refresh fa-spin" style='margin-right:2px'></i><b> Installing dependencies...</b></div>
+            <br />
+            <div style="margin-left:10px;margin-top:-10px" ng-show="component.installationStart.status =='start' && component.installationStart.state == 'unpack'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Unpacking </b></div>
+            <div style="margin-left:10px;margin-top:20px" ng-show="component.installationStart.status =='start' && component.installationStart.state == 'download'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Downloading </b></div>
+            <div ng-show="component.installationRunning != undefined" class="col-md-4 col-xs-4">
+                file:<br \>{{component.installationStart.file}}
+            </div>
+            <div class="col-md-4 col-xs-4" ng-show="component.installationRunning != undefined">
+                <progressbar value="component.progress"></progressbar>
+                <!--<button class="btn btn-default btn-xs center-block" ng-click="cancelInstallation('cancelInstall') " style="margin-top: 5px;">Cancel</button>-->
+            </div>
+            <div class="col-md-2 col-xs-2" ng-show="component.installationRunning != undefined">
+                {{component.installationRunning.pct}}%
+            </div>
+            <div class="col-md-2 col-xs-2" ng-show="component.installationRunning != undefined">
+                {{component.installationRunning.mb}}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="modal-footer">
+    <button type="submit" class="btn btn-success" ng-click="acceptOverride()" ng-disabled="!confirmButton">{{successText}}</button>
+    <button class="btn btn-danger" type="button" ng-click="cancel()">{{failText}}</button>
+</div>

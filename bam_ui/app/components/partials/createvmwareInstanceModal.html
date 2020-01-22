@@ -1,0 +1,79 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">Create VMware Instance</h4>
+</div>
+<div class="modal-body" class="create-rds-modal">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+    <div class="row">
+    	<form class="form-horizontal create-rds-modal" name="$root.initForm">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Virtual machine name :</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" ng-model="data.computer_name" name="">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Clone From :</label>
+                <div class="col-sm-6" ng-if="!gettingImages">
+                    <select class="form-control" id="select-clone"  ng-change="" ng-model="data.clonefrom" ng-options="ins.id as ins.id for ins in images">
+                        <option value="">--select--</option>
+                    </select>
+                </div>
+                <div class="col-sm-2" ng-if="gettingImages"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+            </div>
+            <!--<div class="form-group">
+                <label class="col-sm-4 control-label">Size :</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="select-size"  ng-change="" ng-model="data.size" >
+                        <option value="">--select--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Number of CPUs :</label>
+                <div class="col-sm-6">
+                    <input type="number" class="form-control" ng-model="data.num_cpus" name="">
+                </div>
+            </div>-->
+            <div class="form-group">
+                <label class="col-sm-4 control-label">User Name :</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" ng-model="data.admin_username" name="" >
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Password:</label>
+                <div class="col-sm-6">
+                    <input type="password"  class="form-control" id="password" value="{{data.password}}" name="password" ng-model="data.password" placeholder="Password" ng-minLength="8" ng-maxLength="41" required />
+                    <p style="color: red;" ng-if="initForm.password.$invalid && initForm.password.$dirty">Password contain from 8 to 41 characters.</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Confirm Password:</label>
+                <div class="col-sm-6">
+                    <input type="password" class="form-control" id="password_c" name="password_c" value="{{data.password_c}}" ng-model="data.password_c" placeholder="Password" valid-password-c required  />
+                    <p style="color: red;" ng-show="!initForm.password_c.$error.required && initForm.password_c.$error.noMatch && initForm.password.$dirty">Passwords do not match.</p>
+                </div>
+            </div>
+        </form>
+        <div class="alert alert-danger" role="alert" ng-if="showErrMsg">
+	        {{errMsg}}
+	    </div>
+    </div>
+</div>
+<div class="modal-footer" ng-if="!loading">
+	<div class="pull-left">
+        <div class="pull-left" ng-if="creating">
+            <span> <i class="fa fa-spinner fa-2x  fa-pulse"></i> {{creatingVM}}</span>
+        </div>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-primary" ng-disabled="!data.computer_name || !data.clonefrom || !data.admin_username || !($root.initForm.password.$valid && $root.initForm.password.$viewValue == $root.initForm.password_c.$viewValue) || creating" ng-click="createVM()">
+            Create
+        </button>
+    </div>
+</div>

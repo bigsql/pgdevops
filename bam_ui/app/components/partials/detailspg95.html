@@ -1,0 +1,421 @@
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <server-info-details title="Component Details"></server-info-details>
+
+</section>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert()" class="uib-text">{{alert.msg}}</uib-alert>
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div ng-if="loading" style="position: absolute;width: 100px; height: 50px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+            <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+            <span><h3>Loading...</h3></span>
+        </div>
+        <div ng-if="showErrormsg && !loading" style="text-align: center;"><h4>{{errorData.msg}}</h4></div>
+        <div class="col-md-3 col-sm-4 col-xs-12" ng-if="!loading && !showErrormsg">
+            <!-- Profile Image -->
+            <div class="box box-primary">
+                <div class="box-body box-profile">
+                    <div class="comp-det-top">
+                        <div class="col-md-4"><img class="img-responsive comp-logo-img" id="component-logo" ng-src="assets/img/component-logos/{{ component.component }}.png" err-src="assets/img/component-logos/no_img.png" alt="">
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="comp-name" ng-bind="component.component" id="comp_name"></h3>
+                        </div>
+                        <div class="col-md-5 version-wrapper">
+                            &nbsp;v.<span class="" ng-bind="component.version" id="comp_version"></span>
+                        </div>
+                    </div>
+                    <span class="clearfix"></span>
+                    <div style="text-align: center; padding-bottom: 25px;"><b><a href="" tooltip-append-to-body="true" uib-tooltip="Check out the new features of {{ component.component }}" ng-click="openWhatsNew()"> What's New</a></b></div>
+                    <ul class="list-group list-group-unbordered" id="comp_details">
+                        <li class="list-group-item" ng-show="component.up_time">
+                            <span class="pull-left"><b>Uptime</b></span> <span class="pull-right" ng-bind="component.up_time" id="comp_version"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.datadir || component.logdir">
+                            <span class="pull-left"><span style="cursor: pointer;" tooltip-append-to-body="true" uib-tooltip="{{ component.datadir }}" ng-show="component.datadir != ''" tooltip-class="logDataDirHover"> Data Dir <i class="fa fa-archive"></i> </span></span>
+                            <span class="pull-right"> <a tooltip-append-to-body="true" uib-tooltip="{{ component.logdir }}" ng-show="component.logdir != ''" ui-sref="components.componentLog({component:component.component})" ng-click="logdir(component.logdir) ; logdirSelect()" tooltip-class="logDataDirHover"> Log Dir <i class="fa fa-list-alt"></i> </a> </span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.data_size">
+                            <span class="pull-left"><b>Data Size</b></span> 
+                            <span class="pull-right" ng-bind="component.data_size" id="dt_added"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.is_installed == 1 && component.status!='NotInitialized'">
+                            <span class="pull-left"><b>Auto Start</b></span> 
+                            <span class="pull-right">
+                                <input type="checkbox" ng-model="component.autostart" ng-change="autostartChange(component.autostart)">
+                            </span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.is_installed == 1 ">
+                            <span class="pull-left"><b>Refresh Interval </b>(sec)</span>
+                            <span class="pull-right"><select class="form-control" id="select-refresh-interval" ng-change="changeOption()" ng-model="opt.interval">
+                            <option ng-repeat="option in optionList" value="{{option.value}}">{{option.label}}</option></select>
+                            </span>
+                        </li>
+                    </ul>
+                    <div ng-show="component.status === 'Running'" class="comp-status-wrap text-center">
+                        <i ng-class="statusColors[component.status]" class="fa fa-stop fa-4x"></i>
+                        <h4>{{component.status}} <br /><small><span ng-show="component.status === 'Running'">on port {{component.port}} </span></small></h4>
+                    </div>
+                    <div ng-show="component.status === 'Stopped'" class="comp-status-wrap comp-stop-status-wrap text-center">
+                        <i ng-class="statusColors[component.status]" class="fa fa-stop fa-4x"></i>
+                        <h4>{{component.status}}</h4>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="button-act" ng-click="action($event)">
+                        <div ng-if="component.current_version">
+                            <a style="margin-bottom: 10px;" action="update" class="btn btn-warning" ng-disabled=" component.spinner != undefined || component.installation != undefined">Update v{{component.current_version}}</a>
+                        </div>
+                        <a ng-show="component.status == undefined" action="install" class="btn btn-default" ng-disabled=" component.installation != undefined">Install</a>
+                        <a ng-show="component.status == 'Stopped'" action="start" class="btn btn-success" ng-disabled=" component.spinner != undefined || component.installation != undefined">Start</a>
+                        <a ng-show="component.status == 'Stopped'" action="remove" class="btn btn-default" ng-disabled=" component.spinner != undefined || component.installation != undefined">Remove</a>
+                        <div ng-show="component.status == 'NotInitialized'">
+                            <a class="btn btn-danger" ng-click="openInitPopup(component.component)" ng-disabled=" component.spinner != undefined || component.installation != undefined">Initialize</a>
+                            <a class="btn btn-default" action="remove" ng-disabled=" component.spinner != undefined || component.installation != undefined">Remove</a>
+                        </div>
+                        <div ng-show="component.status == 'Running'">
+                            <a class="btn btn-danger" action="stop" ng-disabled=" component.spinner != undefined || component.installation != undefined">Stop</a>
+                            <a class="btn btn-warning" action="restart" ng-disabled=" component.spinner != undefined || component.installation != undefined">Restart</a>
+                        </div>
+                    </div>
+                    <br />
+                    <div id="dep_stats">
+                        <div ng-if="component.installation != undefined || component.spinner" style="width:100%;height:auto">
+                            <div>
+                                <div ng-if="component.installation && !component.installationStart.status"><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>Installing..</b></div>
+                                <span ng-if="component.spinner"><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>{{component.spinner}}</b></span>
+                                <div style="margin-left:10px;margin-top:20px" ng-if="component.installationDependents != undefined"><i class="fa fa-refresh fa-spin" style='margin-right:2px'></i><b> Installing dependencies...</b></div>
+                                <br />
+                                <div style="margin-left:10px;margin-top:-10px" ng-if="component.installationStart.status =='start' && component.installationStart.state == 'unpack'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Unpacking </b></div>
+                                <div style="margin-left:10px;margin-top:20px" ng-if="component.installationStart.status =='start' && component.installationStart.state == 'download'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Downloading </b></div>
+                                <div ng-if="component.installationRunning != undefined" class="col-md-4 col-xs-4">
+                                    file:<br \>{{component.installationStart.file}}
+                                </div>
+                                <div class="col-md-4 col-xs-4" ng-if="component.installationRunning != undefined">
+                                    <progressbar value="component.progress"></progressbar>
+                                    <button class="btn btn-default btn-xs center-block" ng-click="cancelInstallation('cancelInstall') " style="margin-top: 5px;">Cancel</button>
+                                </div>
+                                <div class="col-md-2 col-xs-2" ng-if="component.installationRunning != undefined">
+                                    {{component.installationRunning.pct}}%
+                                </div>
+                                <div class="col-md-2 col-xs-2" ng-if="component.installationRunning != undefined">
+                                    {{component.installationRunning.mb}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="stats">
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+            <div ng-show="component.category == 1" class="box box-primary" ng-if="!loading && !showErrormsg">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Project Details</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" ng-click="isCollapsed2 = !isCollapsed2" class="btn btn-box-tool">
+                        <div ng-if="isCollapsed2">
+                        <i class="fa fa-plus"></i>
+                        </div>
+                        <div ng-if="!isCollapsed2">
+                        <i class="fa fa-minus"></i>
+                        </div>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body box-profile" uib-collapse="isCollapsed2" id="collapseClusterDetails">
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item" ng-show="component.svcname">
+                            <span class="pull-left"><b>Description</b></span> <span class="pull-right" ng-bind="component.svcname" id="home_url"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.home_url != '' && component.home_url != undefined || component.doc_url != '' && component.doc_url != undefined">
+                            <span class="pull-left"><a ng-show="component.home_url != ''" href="{{component.home_url}}" target='_blank'> Homepage <i class="fa fa-external-link"></i> </a></span> <span class="pull-right"> <a ng-show="component.doc_url != ''" href="{{component.doc_url}}" target='_blank'> Documentation <i class="fa fa-external-link"></i> </a> </span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.release_date">
+                            <span class="pull-left"><b>Release</b></span> <span class="pull-right" ng-bind="component.release_date" id="dt_added">20160114</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div ng-show="component.category == 1" class="col-md-9 col-sm-8 col-xs-12" ng-if="!loading && !showErrormsg">
+
+       
+            <div class="nav-tabs-custom" id="comp-details-tabs-wrapper" ng-controller="graphsTabController">
+                <uib-tabset>
+                    <uib-tab heading="Overview"  active="activeOverview">
+                        <div class="row tab-content graphsTab" style="padding: 15px;">
+                        <div class="row"> 
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box" ng-if="showGraphs">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="uibStatus.tpsChartCollapsed" is-disabled="component.status != 'Running'">
+                                      <uib-accordion-heading>
+                                        <span ng-click="tabClick()">Transactions per Second
+                                            <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !uibStatus.tpsChartCollapsed, 'fa fa-minus': uibStatus.tpsChartCollapsed}"></i>
+                                        </span>
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="transctionsPerSecondChart" data="commitRollbackData"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box" ng-if="showGraphs">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="uibStatus.rpsChartCollapsed" is-disabled="component.status != 'Running'">
+                                      <uib-accordion-heading>
+                                        <span ng-click="tabClick()">Rows per Second
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !uibStatus.rpsChartCollapsed, 'fa fa-minus': uibStatus.rpsChartCollapsed}"></i> 
+                                        </span> 
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="rowsChart" data="rowsData"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>  
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box" ng-if="showGraphs">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="uibStatus.connectionsCollapsed" is-disabled="component.status != 'Running'">
+                                      <uib-accordion-heading>
+                                        <span ng-click="tabClick()">Connections
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !uibStatus.connectionsCollapsed, 'fa fa-minus': uibStatus.connectionsCollapsed}"></i>
+                                        </span> 
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="connectionsChart" data="connectionsData"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box" ng-if="showGraphs">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="uibStatus.cpuChartCollapsed">
+                                      <uib-accordion-heading>
+                                        <span ng-click="tabClick()">Server CPU Load
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !uibStatus.cpuChartCollapsed, 'fa fa-minus': uibStatus.cpuChartCollapsed}"></i>
+                                        </span>
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="cpuChart" data="cpuData"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box" ng-if="showGraphs">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="uibStatus.diskChartCollapsed">
+                                      <uib-accordion-heading>
+                                        <span ng-click="tabClick()">Server Disk I/O 
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !uibStatus.diskChartCollapsed, 'fa fa-minus': uibStatus.diskChartCollapsed}"></i>
+                                        </span> 
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="diskIOChart" data="diskIOData"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="col-md-12 col-xs-12" style="height: 100%; text-align: center;" ng-if="!showGraphs">
+                            <p style="margin: 50px 0">
+                                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                                <span class="sr-only">Loading...</span>
+                            </p>
+                        </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Activity" disable="component.status != 'Running'">
+                        <div class="row tab-content" style="padding: 10px;">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="box" id="activityTab">
+                                    <div class="box-header">
+                                        <h3 class="box-title">PG_STAT_ACTIVITY</h3>
+                                    </div>
+                                    <div class="box-body table-responsive no-padding">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-md-1 col-xs-1"><b>PID</b></th>
+                                                    <th class="col-md-5 col-xs-5"><b>Query</b></th>
+                                                    <th class="col-md-2 col-xs-2"><b>Query Time</b></th>
+                                                    <th class="col-md-2 col-xs-2"><b>DB</b></th>
+                                                    <th class="col-md-1 col-xs-1"><b>User</b></th>
+                                                    <th class="col-md-1 col-xs-1"><b>Cl. Addr.</b></th>
+                                                    
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody ng-show="noActivities == false">
+                                                <tr ng-repeat=" activity in activities">
+                                                    <!-- <div class="row component_box"> -->
+                                                    <td>{{activity.pid}}</td>
+                                                    <td>{{activity.query}}</td>
+                                                    <td>{{activity.query_time}}</td>
+                                                    <td>{{activity.datname}}</td>
+                                                    <td>{{activity.usename}}</td>
+                                                    <td>{{activity.client_addr}}</td>
+                                                    
+                                                    
+                                                    <!-- </div> -->
+                                                </tr>
+                                            </tbody>
+                                            <tbody ng-show="noActivities == true">
+                                                <tr>
+                                                    <td colspan="6">
+                                                        <p class="lead">No Database Activity.</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Configure" ng-click="configureTabEvent()" disable="component.status != 'Running'">
+                        <div ng-if="gridSettings">
+                            <div class="gridStyle" ui-grid-expandable  ui-grid="gridSettings" class="col-md-12 col-sm-12 col-xs-12"></div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Databases" ng-click="dataBaseTabEvent()" disable="component.status != 'Running'">
+                        <div ng-if="gridOptions">
+                            <div class="gridStyle" ui-grid="gridOptions" class="col-md-12 col-sm-12 col-xs-12"></div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Security" ng-click="securityTabEvent()" disable="component.status != 'Running'">
+                    <div class="gridStyle">
+                        <div class="box box-primary">
+                            <!-- <div class="box-header with-border">
+                                <h3 class="box-title"> PG hba Configuration </h3> 
+                            </div> -->
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <span class="pull-left"><a href="https://www.bigsql.org/docs/security/index.jsp" target='_blank'> Documentation <i class="fa fa-external-link"></i></a></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <span class="securityTabStyle">
+                                            {{securityTabContent}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </uib-tab>
+                    <uib-tab heading="Performance" ng-click="performanceTabEvent()" disable="component.status != 'Running'">
+                    <div class="gridStyle">
+                        <div class="box box-primary">
+                            <div class="box-body">
+                                <div class="row">
+                                    <div style="padding-top: 20px;" class="col-md-12 col-sm-12 col-xs-12">
+                                        <a style="margin-right: 10px;" class="btn btn-lg btn-default" tooltip-append-to-body="true" uib-tooltip="{{ component.logdir }}" ng-show="component.logdir != ''" ui-sref="components.componentLog({component:'pgcli'})" ng-click="logdir(component.logdir) ; logdirSelect()" tooltip-class="logDataDirHover">
+                                            <i class="fa fa-file-text-o fa-2x pull-left"></i>
+                                            Log Tailer
+                                        </a>
+
+                                        <a style="margin-right: 10px;" class="btn btn-lg btn-default" ui-sref="components.profiler">
+                                            <i class="bgs bgs-lg bgs-plprofiler pull-left"></i> plProfiler Console
+                                        </a>
+
+                                        <a class="btn btn-lg btn-default" ui-sref="components.badger">
+                                            <i class="bgs bgs-lg bgs-pgbadger pull-left"></i> 
+                                            pgBadger Console
+                                        </a>
+
+                                        <a class="btn btn-lg btn-default" ng-click="showTuningSet()" style="margin-left:10px;">
+                                            <i class="bgs bgs-lg bgs-dbtune pull-left"></i> 
+                                            Tuning Service
+                                        </a>
+                                    </div>
+                                    <div style="padding-top: 20px;" class="col-md-12 col-sm-12 col-xs-12" ng-if="showTuneData">
+                                        <div>
+                                            <div class="box box-primary">
+                                                <div class="box-header"> <h4>Tune PostgreSQL</h4></div>
+                                                <div class="box-body">
+                                                    <div class="row" style="padding-top: 40px;">
+                                                        <div class="col-md-4 col-sm-4 col-xs-4">
+                                                            <select class="form-control" id="workload" ng-model="workload">
+                                                                <option value="">Workload</option> 
+                                                                <option value="transProcessing">Transaction Processing</option>
+                                                                <option value="ETL">ETL</option>
+                                                                <option value="reporting">Reporting</option>
+                                                            </select>
+                                                            <br>
+                                                            <br>
+                                                            <button class="btn-primary btn center-block">Submit</button>
+                                                        </div>
+                                                        <div class="col-md-8 col-sm-8 col-xs-8">
+                                                           <div class="DBTuneSSHInfo" ng-if="sshPgcInfo">
+                                                                <form class="form-horizontal" id="pgc-info-box">
+                                                                    <div class="form-group">
+                                                                        <div class="col-sm-3"> <strong> Platform </strong> </div>
+                                                                        <div class="col-sm-9 info-text">:  {{sshPgcInfo.platform}} &nbsp;|&nbsp; {{sshPgcInfo.os}}</div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <div class="col-sm-3"> <strong> Memory </strong> </div>
+                                                                        <div class="col-sm-9 info-text">:  {{sshPgcInfo.mem}} GB</div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <div class="col-sm-3"> <strong> CPU </strong> </div>
+                                                                        <div class="col-sm-9 info-text">:  {{sshPgcInfo.cores}} x {{sshPgcInfo.cpu}}</div>
+                                                                    </div>
+                                                                </form>
+                                                           </div> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </uib-tab>
+                    <uib-tab heading="Release Notes" ng-click="releaseTabEvent()" active="activeReleaseNotes">
+                        <div class="gridStyle">
+                            <div class="box box-primary">
+                                <div class="box-body">
+                                    <div class="col-md-12 col-xs-12" style="height: 700px; overflow: scroll;">
+                                        <span ng-bind-html="relnotes"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+        </div>
+    </div>
+</section>

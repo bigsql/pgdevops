@@ -1,0 +1,84 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title" id="updateModalLabel"> Top ({{ host }}) </h4>
+</div>
+<div ng-click="cancel()" class="close-modal" data-dismiss="modal" aria-hidden="true">
+    <div class="lr">
+        <div class="rl">
+        </div>
+    </div>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{ alert.type }}" dismiss-on-timeout="8000" close="closeAlert()"
+           class="uib-text">{{ alert.msg }}</uib-alert>
+
+<div class="container-fluid" ng-show="loadingSpinner">
+    <div class="row">
+        <div class="col-md-12 col-xs-12">
+            <div class="well">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i>&#160;&#160;&#160;Checking for Top Process..
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-body">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <div class="text-center" ng-if="timeoutMsg">
+        <strong>{{timeoutMsg}}</strong>
+    </div>
+    <div class="container-fluid" ng-if="!loading && !timeoutMsg">
+        <div class="row">
+            <div class="col-md-12" ng-if="hostActive.state">
+                <p ng-if="topProcess.state=='error'" class="text-danger">Error while running top command : {{ topProcess.msg }}</p>
+                <h5>
+                    <strong> OS </strong> : {{ hostinfo.os }} &nbsp;
+                    <strong>HW </strong>: {{ hostinfo.mem }} GB, {{ hostinfo.cores }} x {{ hostinfo.cpu }} &nbsp;
+                    <strong>PGC</strong> : {{ hostinfo.version }}
+                </h5>
+
+                <h5 ng-if="topProcess.cpu_user">
+                    <strong> CPU Usage </strong>: {{ topProcess.cpu_user }} %user &nbsp; {{ topProcess.cpu_system }} %sys &nbsp;
+                    {{ topProcess.cpu_idle }} %idle &nbsp; <span ng-if="topProcess.iowait">{{ topProcess.iowait }} %wait &nbsp;</span>
+                </h5>
+                <h5>
+                    <strong>DISK </strong>: KB Read {{ kb_read_sec }}/sec &nbsp; ,
+                    KB Written {{ kb_write_sec }}/sec &nbsp;
+                </h5>
+                <h5 ng-if="topProcess.load_avg"><strong>Load Average </strong>: {{ topProcess.load_avg }} &nbsp;
+                    <strong>Uptime </strong>: {{ topProcess.uptime }} &nbsp;
+                </h5>
+
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="col-md-1">PID</th>
+                            <th class="col-md-1">User</th>
+                            <th class="col-md-1">%CPU</th>
+                            <th class="col-md-1">%MEM</th>
+                            <th class="col-md-2">TIME+</th>
+                            <th class="col-md-6">COMMAND</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(key, value) in topProcess.top">
+                            <td class="col-md-1">{{ value.pid }}</td>
+                            <td class="col-md-1">{{ value.username }}</td>
+                            <td class="col-md-1">{{ value.cpu_percent }}</td>
+                            <td class="col-md-1">{{ value.memory_percent }}</td>
+                            <td class="col-md-2">{{ value.ctime }}</td>
+                            <td class="col-md-6">{{ value.name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-12" ng-if="!hostActive.state">
+                {{errorMsg}}
+            </div>
+        </div>
+    </div>
+</div>

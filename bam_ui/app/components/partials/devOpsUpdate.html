@@ -1,0 +1,14 @@
+<div class="modal-header">
+    <img src="../assets/img/logoBIG.png" alt="">
+    <h4 class="modal-title" id="updateModalLabel">BigSQL Ops Manager update</h4>
+</div>
+<div class="modal-body">
+        <p ng-hide="bamUpdateIntiated">WE NEED TO SUSPEND THE GUI MANAGER WHILE WE UPDATE. THIS SHOULD TAKE A FEW MINUTES. <br /> CLICK THE BUTTON BELOW TO START THE PROCESS.</p>
+        <div ng-show="updatingStatus" style="width:600px; margin:0 auto;">BigSQL Ops Manager Updating {{currentVersion}} to {{updateVersion}} </div>
+        <br />
+        <img ng-show="updatingStatus" style="width:100px;" src="/assets/loaders/loader.gif" />
+        <button class="btn btn-default" ng-hide="bamUpdateIntiated" ng-click="action($event)">Update BigSQL Ops Manager Version {{currentVersion}} to {{updateVersion}} </button>
+        <button class="btn btn-default" ng-show="bamUpdatedStatus" ng-click="redirect()"> BigSQL Ops Manager has been updated, Click to launch</button>
+        <button class="btn btn-default" ng-show="bamNotUpdatedStatus" ng-click="redirect()"> BigSQL Ops Manager not updated</button>
+    
+</div>

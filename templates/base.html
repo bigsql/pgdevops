@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>{% block title %}{{ config.APP_NAME }}{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="dcterms.rightsHolder" content="The BigSQL Development Team">
+    <meta name="dcterms.rights" content="All rights reserved">
+    <meta name="dcterms.dateCopyrighted" content="2015 - 2017">
+
+
+    <link rel="icon" type="image/png" href="assets/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="assets/img/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="assets/img/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="assets/img/favicon-16x16.png" sizes="16x16">
+    <link rel="stylesheet" type="text/css" href="static/bigSQL.min.css">
+    <script src="static/m/modernizr.js"></script>
+    <link rel="manifest" href="assets/img/manifest.json">
+    <link rel="mask-icon" href="assets/img/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="assets/img/favicon.ico">
+
+    <!-- Base template stylesheets -->
+    <!-- Base template stylesheets -->
+    <link type="text/css" rel="stylesheet"
+          href="/admin{{ url_for('static', filename='vendor/bootstrap/dist/css/bootstrap.css' if config.DEBUG else 'vendor/bootstrap/dist/css/bootstrap.min.css')}}"/>
+    <link type="text/css" rel="stylesheet"
+          href="/admin{{ url_for('static', filename='vendor/alertifyjs/alertify.css' if config.DEBUG else 'vendor/alertifyjs/alertify.min.css') }}"/>
+    <link type="text/css" rel="stylesheet"
+          href="/admin{{ url_for('static', filename='vendor/alertifyjs/themes/bootstrap.css' if config.DEBUG else 'vendor/alertifyjs/themes/bootstrap.min.css') }}"/>
+    <link type="text/css" rel="stylesheet"
+          href="/admin{{ url_for('static', filename='vendor/bootstrap/dist/css/bootstrap-theme.css' if config.DEBUG else 'vendor/bootstrap/dist/css/bootstrap-theme.min.css') }}"/>
+    <link type="text/css" rel="stylesheet"
+          href="/admin{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.css' if config.DEBUG else 'vendor/font-awesome/css/font-awesome.min.css') }}"/>
+
+    <!-- View specified stylesheets -->
+    {% for stylesheet in current_app.stylesheets %}
+    <link type="text/css" rel="stylesheet" href="{{ stylesheet }}">
+    {% endfor %}
+
+    <link type="text/css" rel="stylesheet" href="/admin{{ url_for('static', filename='css/bootstrap.overrides.css') }}"/>
+    <link type="text/css" rel="stylesheet" href="/admin{{ url_for('static', filename='css/pgadmin.css') }}"/>
+    {% block css_link %}{% endblock %}
+
+
+
+</head>
+<body>
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+<div class="wrapper" id="meta-wrapper">
+{% block body %}{% endblock %}
+<script>
+            {% block init_script %}{% endblock %}
+
+</script>
+</div>
+<script>
+    var hasWebsockets = Modernizr.websockets;
+
+    function get_browser() {
+        var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+        if(/trident/i.test(M[1])){
+            tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
+            return {name:'IE',version:(tem[1]||'')};
+            }
+        if(M[1]==='Chrome'){
+            tem=ua.match(/\bOPR|Edge\/(\d+)/)
+            if(tem!=null)   {return {name:'Opera', version:tem[1]};}
+            }
+        M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+        if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+        return {
+          name: M[0],
+          version: M[1]
+        };
+     }
+
+    var req_ver = {'MSIE': 'MSIE11 +', 'Chrome':'57 +', 'Firefox' : '46 +', 'Edge' : '40 +', 'Safari' : '10 +'}
+
+    if (!hasWebsockets) {
+
+        var browser=get_browser();
+        var badBrowserModal = '<div class="warning-modal-wrapper">' +
+            '    <div class="modal-popup">' +
+            '        <h1>Your browser version is not supported</h1>' +
+            '        <p>You can use pgDevOps by BigSQL with an updated browser. Click on an icon to download one below.</p>' +
+            '        <div>' +
+            '        <div>Current version : <span id="browser_ver"></span></div>' +
+            '        <div>Required version : <span id="req_browser_ver"></span></div>' +
+            '        <a target="_blank" href="https://www.google.com/chrome/browser/desktop/index.html"><img class="chrome-icon" src="assets/img/chrome_logo.png" alt=""></a>' +
+            '        <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/"><img class="firefox-icon" src="assets/img/firefox_logo.png" alt=""></a>' +
+            '        <a target="_blank" href="https://www.microsoft.com/en-in/download/Internet-Explorer-11-for-Windows-7-details.aspx"><img class="ie11-icon" src="assets/img/ie11_logo.png" alt=""></a>' +
+            '        </div>' +
+            '    </div>' +
+            '</div>';
+
+
+        var el = document.getElementById("meta-wrapper");
+        el.innerHTML = badBrowserModal;
+        var browser_ver = document.getElementById("browser_ver");
+        browser_ver.innerHTML = browser.name + " " + browser.version;
+        var req_browser_ver = document.getElementById("req_browser_ver");
+        req_browser_ver.innerHTML = req_ver[browser.name];
+    }
+</script>
+
+</body>
+</html>

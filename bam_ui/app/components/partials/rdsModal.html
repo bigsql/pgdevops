@@ -1,0 +1,166 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" style="margin-left: 10px;" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <div>
+        <h4 class="modal-title pull-left"> {{disp_name}} </h4>
+        <h5 class="modal-title pull-right" id="refreshCounter" ng-if="showCounter && isAutoRefresh.value && !loadingSpinner"> {{autorefreshMsg}} {{counter}} seconds</h5>
+    </div>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{ alert.type }}" dismiss-on-timeout="8000" close="closeAlert()"
+           class="uib-text"><span ng-bind-html="alert.msg"></span><a ng-if="labNotEnabled" href="#/components/settings" ng-click="cancel()">settings</a></uib-alert>
+
+<div class="modal-body">
+    <div class="row" ng-if="!loadingSpinner">
+        <div class="col-sm-4 col-xs-4 col-md-3" style="margin-right: -100px; margin-top: 5px; margin-left:10px;"><strong>Select Region :</strong> </div>
+        <div class="col-sm-4 col-xs-4 col-md-3">
+            <select class="form-control" ng-options="region.region as region.location for region in regions" ng-model="region">
+                <option value="">All Regions</option>
+            </select>
+        </div>
+        <div class="col-sm-4 col-xs-4 col-md-1">
+            <button class="btn btn-default"  ng-click="regionChange(region)">Search <i class="fa fa-search" aria-hidden="true"></i></button>
+        </div>
+        <div class="col-sm-4 col-xs-4 col-md-5">
+            <button style="margin-left: 20px;" ng-if="instance == 'db' && showUseConn && rdsList && !noRDS" class="btn btn-primary" ng-disabled="!isAllSelected && !checked" ng-click="createConnPgadmin()">Use Connections</button>
+            <button style="margin-left: 20px;" ng-if="showAddSSHHost" class="btn btn-primary" ng-disabled="ec2Selected == -1 || devRole" ng-click="addSSHHost()">Add Managed SSH Host</button>
+            <label class="pull-right" ng-if="showUseConn && !errMsg"><input type="checkbox" name="" ng-model="isAutoRefresh.value" class="form-check-input" id="autoRefreshAction" ng-change="autoRefresh()"> Auto Refresh</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-xs-12" ng-if="loadingSpinner">
+            <div class="well">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i>&nbsp; {{discoverMsg}}
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-bind="errMsg" ng-if="!loadingSpinner && !rdsList && errMsg">
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-if="addToMetadata">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i> &nbsp; {{addToMetadataMsg}}
+            </div>
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="well" ng-if="noRDS">
+                <div> {{noInstanceMsg}} </div>
+            </div>
+        </div>
+        <div ng-if="availList.length > 0 && !addToMetadata">
+            <div class="box-body">
+                <div id="serversTable">
+                <div class="component_head_box">
+                    <div>
+                    <div class="col-md-2 col-sm-2 col-xs-2">
+                        <div class="col-md-4 col-sm-4">
+                            <input type="checkbox" ng-click="toggleAll()" ng-model="isAllSelected" name="">
+                        </div>
+                        <div class="col-md-8 col-sm-8"><strong>Region</strong></div>
+                    </div>
+                    <div class="col-md-10 col-sm-10">
+                        <div class="col-md-2 col-sm-2"><strong>Instance</strong></div>
+                        <div class="col-md-2 col-sm-2"><strong>Status</strong></div>
+                        <div class="col-md-4 col-sm-4"><strong>Class</strong></div>
+                        <div class="col-md-2 col-sm-2"><strong>DBName</strong></div>
+                        <!--<div class="col-md-1 col-sm-1" style="margin-left: -15px;"><strong>MultiAZ</strong></div>-->
+                    </div>
+                    </div>
+                </div>
+                <div class="instance-list-body">
+                    <div ng-repeat="rds in availList" class= "component_box" ng-class-odd="'oddRow'" style="border-bottom: 1px solid #f4f4f4;">
+                        <div>
+                        <div class="col-md-2 col-sm-2">
+                            <div class="col-md-4 col-sm-4">
+                                <input type="checkbox" ng-model="rds.selected" ng-change="optionToggled()" ng-if="!rds.is_in_pglist" name="">
+                                <input type="checkbox" ng-checked="true" ng-disabled="true" ng-if="rds.is_in_pglist" name=""> 
+                            </div>
+                            <div class="col-md-8 col-sm-8" style="white-space: nowrap;">
+                                {{rds.region}}
+                            </div>
+                        </div>
+                        <div class="col-md-10 col-sm-10">
+                            <div class="col-md-2 col-sm-2" style="white-space: nowrap; cursor: pointer;" ng-click="openRDSdetails(rds.instance, rds.region, rds.db_class)">
+                                <a>{{rds.instance}}</a>
+                            </div>
+                            <div class="col-md-2 col-sm-2" style="white-space: nowrap;" ng-class="{ 'greenText' :rds.status == 'available' , 'redText' : rds.status != 'available'}">
+                                {{rds.status}}
+                            </div>
+                            <div class="col-md-4 col-sm-4" style="white-space: nowrap;">
+                                {{rds.db_class}}
+                            </div>
+                            <div class="col-md-2 col-sm-2" style="white-space: nowrap;">
+                                {{rds.db_name}}
+                            </div>
+                            <!--<div class="col-md-1 col-sm-1 col-xs-1" ng-class="{ 'greenText' :rds.az_is_multi == 'True' , 'redText' : rds.az_is_multi != 'True'}">
+                                {{rds.az_is_multi == "True" ? "Yes":"No"}}
+                            </div>-->
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="ec2List.length > 0 ">
+            <div class="box-body">
+                <div id="serversTable">
+                <div class="component_head_box">
+                    <div class="row">
+                    <div class="col-md-2 col-sm-2 col-xs-2">
+                        <div class="col-md-4 col-sm-4 col-xs-4">
+                            <!--<input type="checkbox" ng-click="toggleAll()" ng-model="isAllSelected" name="">-->
+                        </div>
+                        <div class="col-md-8 col-sm-8 col-xs-8"><strong>Region</strong></div>
+                    </div>
+                    <div class="col-md-10 col-sm-10 col-xs-10">
+                        <div class="col-md-5 col-sm-5 col-xs-5"><strong>Name</strong></div>
+                        <div class="col-md-2 col-sm-2 col-xs-2"><strong>Type</strong></div>
+                        <div class="col-md-2 col-sm-2 col-xs-2"><strong>Public IP's</strong></div>
+                        <div class="col-md-2 col-sm-2 col-xs-2"><strong>Private IP's</strong></div>
+                        <!--<div class="col-md-2 col-sm-2 col-xs-2"><strong>Status</strong></div>
+                        <div class="col-md-3 col-sm-3 col-xs-3"><strong>Key Name</strong></div>-->
+                    </div>
+                    </div>
+                </div>
+                <div class="instance-list-body">
+                    <div ng-repeat="ec in ec2List track by $index" class= "component_box" ng-class-odd="'oddRow'" style="border-bottom: 1px solid #f4f4f4;">
+                        <div class="row">
+                        <div class="col-md-2 col-sm-2 col-xs-2">
+                            <div class="col-md-4 col-sm-4 col-xs-4">
+                                <input type="radio" ng-model="ec2Selected" ng-change='ec2OptionToggled(ec)' name="ec2Select">
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-8" style="white-space: nowrap;">
+                                {{ec.region}}
+                            </div>
+                        </div>
+                        <div class="col-md-10 col-sm-10 col-xs-10">
+                            <div class="col-md-5 col-sm-5 col-xs-5" style="white-space: nowrap;">
+                                {{ec.name}}
+                            </div>
+                            <div class="col-md-2 col-sm-2 col-xs-2" style="white-space: nowrap;">
+                                {{ec.type}}
+                            </div>
+                            <div class="col-md-2 col-sm-2 col-xs-2" style="white-space: nowrap;">
+                                {{ec.public_ips}}
+                            </div>
+                            <div class="col-md-2 col-sm-2 col-xs-2" style="white-space: nowrap;">
+                                {{ec.private_ips}}
+                            </div>
+
+                            <!--<div class="col-md-2 col-sm-2 col-xs-2" style="white-space: nowrap;" ng-class="{ 'greenText' :ec.state_name == 'running' , 'redText' : ec.state_name != 'running'}">
+                                {{ec.state_name}}
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3" style="white-space: nowrap;" >
+                                {{ec.keyname}}
+                            </div>-->
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

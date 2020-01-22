@@ -1,0 +1,41 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4  class="modal-title">Console</h4>
+</div>
+<div class="modal-body">
+    <div ng-if="loading" style="text-align: center;">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+
+    <div class="form-group" ng-if="sudo_pwd">
+        <label class="col-sm-2 control-label">sudo password:<span class="requiredSymbol">*</span></label>
+                <div class="col-sm-3">
+                    <input type="password" ng-model="pwd.text" id="rpwd" class="form-control" placeholder="password">
+                </div>
+        <span class="input-group-btn">
+            <button class="btn btn-default" ng-click="continueAction(btnAction)">Continue</button>
+        </span>
+    </div>
+
+    <div ng-if=!loading>
+        <div class="form-group" ng-if="!registering && !procDone && !pgdgComp">{{pgdgRepo}} is not currently registered. Do you want to register? &nbsp; <button class="btn btn-default" ng-click="register()">Register</button></div>
+        <div class="form-group" ng-if="registering">
+            <i class='fa fa-spinner fa-2x  fa-pulse'> </i>&nbsp;Registering {{pgdgRepo}}
+        </div>
+        <div class="form-group" ng-if="installing">
+            <i class='fa fa-spinner fa-2x  fa-pulse'> </i>&nbsp;Installing {{pgdgComp}}
+        </div>
+        <div class="form-group" ng-if="removing">
+            <i class='fa fa-spinner fa-2x  fa-pulse'> </i>&nbsp;Removing {{pgdgComp}}
+        </div>
+        <!-- <div class="form-group" ng-if="procDone && !pgdgComp">{{pgdgRepo}} has been registered.</div> -->
+        <div class="form-group" ng-if="procCmd"><strong> Command</strong> : {{procCmd}}</div>
+        <form>
+            <div class="form-group">
+                <div id="console" class="form-control feedback-console">{{out_data}}</div>
+            </div>
+        </form>
+    </div>
+</div>

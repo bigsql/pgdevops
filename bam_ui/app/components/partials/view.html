@@ -1,0 +1,211 @@
+<section class="content-header">
+    <server-info-details title="Package Manager"></server-info-details>
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert()" class="uib-text">{{alert.msg}}</uib-alert>
+</section>
+
+<span id="components"></span>
+<section class="content">
+    <uib-tabset>
+        <uib-tab ng-click="selectedBigsqlRepo()" heading="PostgreSQL">
+            <uib-tab-heading>
+              <div style="text-align: center;">BigSQL Repository</div>
+            </uib-tab-heading>
+            <div class="box" style="border-top: 0px;">
+            <div class="box-body">
+                <div class="components-update-button-wrapper" ng-if="components && !pgcNotAvailable">
+                    <label>
+                        <input type="checkbox" ng-model="showComps.test" ng-click="setTest(false)">&nbsp; Show test packages</input>
+                    </label>
+                    &nbsp;
+                    &nbsp;
+                    <label>
+                        <input type="checkbox" ng-model="showInstalled" ng-disabled="disableShowInstalled" ng-click="installedComps()"></input> Show installed only
+                    </label>
+                    &nbsp;
+                    &nbsp;
+                    <button ng-click="open('manual')" class="btn btn-default" type="button"> Check for updates now</button>         
+                </div>
+            <div ng-if="loading"  style="height: 250px">
+            <div ng-if="loading" style="position: absolute;width: 100px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+                <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+                <span><h3>Loading...</h3></span>
+            </div>
+            </div>
+            <span ng-if="retry" style="text-align: center;"> <h4>Cannot connect to PGC. Retrying connection ... </h4> </span>
+            <span ng-if="pgcNotAvailable && !loading" style="text-align: center;"> <h4>{{errorData.msg}}</h4> </span>
+            <div ng-if="nothingInstalled" class="jumbotron" style="background-color: #fff; margin-top: 15px; text-align: center;"> <h3> You haven't installed anything yet</h3>
+            </div>
+            <div ng-if="!loading && !retry">
+                <div ng-repeat="(key, value) in components | groupBy: 'category_desc'">
+                    <div class="box-header" ng-if="key != 'Extensions'">
+                        <h3 class="box-title" ng-bind="key" ng-if="value.length"></h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-6" ng-repeat="c in value" ng-if="c.category_desc == 'PostgreSQL'" id="{{c.component}}-comp-box">
+                            <i class="fa fa-check-circle-o fa-2x pull-right installedSymbol" id="{{c.component}}-ins-symbol" ng-if="c.status == 'Installed'|| c.status == 'NotInitialized'"></i>
+                            <span class="update-component-arrow-wrapper" tooltip-append-to-body="true" uib-tooltip="New version available: {{c.current_version}}" ng-if="c.updates>0">
+                                <i class="fa fa-arrow-circle-down fa-2x" id="updateIcon" style="color: #FF8A21"></i>
+                            </span>
+                            <span class="test-comp-icon" ng-if="c.stage != 'prod'" tooltip-append-to-body="true" uib-tooltip="Test Component"></span>
+                            <div ng-class="c.extensionOpened && extensionsList.length ? 'select-comp-area' : 'comp-area'" ng-click="getExtensions(c.component, $index)">
+                                <img class="comp-img img-responsive" ng-src="assets/img/component-logos/{{ c.component }}.png"  err-src="assets/img/component-logos/no_img.png" alt="">
+                                <div class="caption">
+                                    <div style="white-space: nowrap; text-align: center;">
+                                        <h5>
+                                            <a href="#/details-pg/{{c.component}}">{{c.disp_name}}</a>
+                                        </h5>
+                                    </div>
+                                    <div ng-class="c.extensionOpened ? 'expandExt' : ''" ng-if="extensionsList.length">
+                                        <h5 ng-if="c.extensionOpened">
+                                            <strong>Extensions</strong>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row extensions-row" ng-if="$index == 0 && extensionsList.length">
+                        <div ng-if="ExtensionsLoading" class="extLoading">
+                            <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+                            <span><h3>Loading...</h3></span>
+                        </div>
+                        <div ng-if="noExtension.found && !ExtensionsLoading" class="extLoading"><strong>No Extensions Found</strong></div>
+                        <div ng-hide="ExtensionsLoading || noExtension.found" class="col-md-2 col-sm-3 col-xs-6 extensions-area"  ng-click="openDetailsModal(ext.component)" style="width: 11.499999995% ; padding: 13px;" ng-repeat="ext in extensionsList" id="{{ext.component}}-comp-box">
+                            <span class="badge new-comp-wrapper" ng-if="ext.is_new == 1 && ext.status == 'NotInstalled'" style="position: absolute;" tooltip-append-to-body="true" uib-tooltip="Release date: {{ ext.release_date }}">New</span>
+                            <i class="fa fa-check-circle-o pull-right installedSymbol" ng-if="ext.status == 'Installed'|| ext.status == 'NotInitialized'" style="position: absolute; margin-left: 95px" id="{{ext.component}}-ins-symbol"></i>
+                            <span class="update-component-arrow-wrapper" style="position: absolute;" tooltip-append-to-body="true" uib-tooltip="New version available: {{ext.current_version}}" ng-if="ext.updates>0">
+                                <i class="fa fa-arrow-circle-down" id="updateIcon" style="color: #FF8A21"></i>
+                            </span>
+                            <span class="test-comp-icon" ng-if="ext.stage != 'prod'" tooltip-append-to-body="true" uib-tooltip="Test Component"></span>
+                            <div class="extension-area-comp">
+                                <img class="comp-img img-responsive ext-img" ng-src="assets/img/component-logos/{{ ext.modifiedName }}.png"  err-src="assets/img/component-logos/no_img.png" alt="">
+                                <div class="description-style">
+                                    <h5 style="margin-bottom: 4px;">
+                                        <a>{{ext.disp_name}}</a>
+                                    </h5>
+                                    <i>{{ext.short_desc}}</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row non-pg-comp-row">
+                        <div class="col-md-2 col-sm-3 col-xs-6" ng-click="openDetailsModal(c.component)" style="width: 11.499999995% ; padding: 0px 13px 13px 13px;" ng-repeat="c in value" ng-if="c.category_desc != 'PostgreSQL' && c.category_desc != 'Extensions' && c.component != 'devops' && c.component != 'bam2'" id="{{c.component}}-comp-box">
+                            <span class="badge new-comp-wrapper" ng-if="c.is_new == 1 && c.status == 'NotInstalled'" tooltip-append-to-body="true" uib-tooltip="Release date: {{ c.release_date }}" style="position: absolute;">New</span>
+                            <i class="fa fa-check-circle-o pull-right installedSymbol" ng-if="c.status == 'Installed'|| c.status == 'NotInitialized'" style="position: absolute; margin-left: 95px" id="{{c.component}}-ins-symbol"></i>
+                            <span class="update-component-arrow-wrapper" style="position: absolute;" tooltip-append-to-body="true" uib-tooltip="New version available: {{c.current_version}}" ng-if="c.updates>0">
+                                <i class="fa fa-arrow-circle-down" id="updateIcon" style="color: #FF8A21"></i>
+                            </span>
+                            <span class="test-comp-icon" ng-if="c.stage != 'prod'" tooltip-append-to-body="true" uib-tooltip="Test Component"></span>
+                            <div class="extension-area-comp">
+                                <img class="comp-img ext-img img-responsive" ng-src="assets/img/component-logos/{{ c.component }}.png"  err-src="assets/img/component-logos/no_img.png" alt="">
+                                <div class="description-style">
+                                    <h5 style="margin-bottom: 4px;">
+                                        <a>{{c.disp_name}}</a>
+                                    </h5>
+                                    <i>{{c.short_desc}}</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+    </uib-tab>
+    <uib-tab ng-if="checkpgdgSetting && osSupport" select="selectPgDg($event)">
+        <uib-tab-heading>
+          <div style="text-align: center;">PGDG Repository</div>
+        </uib-tab-heading>
+        <div class="box" style="border-top: 0px;">
+            <div class="box-body" ng-if="pgdgNotAvailable && !gettingPGDGdata">
+                <div style="text-align: center;"><h4>{{pgdgNotAvailableMsg}}</h4></div>
+            </div>
+            <div class="form-group" ng-if="sudo_pwd">
+                <label class="col-sm-2 control-label">sudo password:<span class="requiredSymbol">*</span></label>
+                        <div class="col-sm-3">
+                            <input type="password" ng-model="pwd.text" id="rpwd" class="form-control" placeholder="password">
+                        </div>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" ng-click="continueAction()">Continue</button>
+                </span>
+            </div>
+            <div class="box-body">
+                <form class="form-inline" ng-if="showRepoList && !pgdgNotAvailable">
+                    <label>Repository:&nbsp;</label>
+                    <select class="form-control" ng-model="selectRepo.value" ng-change="repoChange(selectRepo.value)" ng-disabled="gettingPGDGdata">
+                    <option value="">--select--</option>
+                    <option ng-repeat="repo in pgdgRepoList" value="{{repo.repo}}">{{repo.repo}}</option>
+                    </select> &nbsp; &nbsp;
+                    <label>
+                        <input type="checkbox" ng-model="showComps.test" ng-click="setTest(true)">&nbsp; Show extra packages</input>
+                    </label>         
+                </form>
+                <br>
+                <div ng-if="gettingPGDGdata" style="height: 250px">
+                    <div style="position: absolute; width: 100px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+                        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+                        <span><h3>Loading...</h3></span>
+                    </div>
+                </div>
+                <div ng-if="!noRepoSelected" class="col-md-8 col-sm-12 col-xs-12">
+                <div class="box" ng-if="!gettingPGDGdata && !pgdgNotAvailable && repoList.length>0">
+                    <div class="box-body">
+                        <div id="serversTable">
+                            <div class="component_head_box" ng-if="!os.ubuntu">
+                                <div class="col-md-6 col-sm-6 col-xs-6"><strong>Component</strong></div>
+                                <div class="col-md-3 col-sm-3 col-xs-3"><strong>Version</strong></div>
+                                <div class="col-md-1 col-sm-1 col-xs-1"><strong style="margin-left: -25px;">Installed</strong></div>
+                                <div class="col-md-2 col-sm-2 col-xs-2"><strong>Actions</strong></div>
+                            </div>
+                            <div class="component_head_box" ng-if="os.ubuntu">
+                                <div class="col-md-5 col-sm-5 col-xs-5"><strong>Component</strong></div>
+                                <div class="col-md-4 col-sm-4 col-xs-4"><strong>Version</strong></div>
+                                <div class="col-md-3 col-sm-3 col-xs-3" style="text-align: center; margin-left: -20px;" ng-if="os.ubuntu"><strong>Actions</strong></div>
+                            </div>
+                            <div id="serversTableTbody">
+                                <div ng-repeat="c in repoList" class= "component_box" ng-class-odd="'oddRow'" style="border-bottom: 1px solid #f4f4f4;">
+                                    <div class="col-md-6 col-sm-6 col-xs-6" ng-if="!os.ubuntu">
+                                        <div class="comp-name" style="white-space: nowrap;">
+                                            <a class="serversTableTbody-component--link" tooltip-append-to-body="true" ng-bind = "c.component">
+                                            {{c.component}}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-xs-5" ng-if="os.ubuntu">
+                                        <div class="comp-name" style="white-space: nowrap;">
+                                            <a class="serversTableTbody-component--link" tooltip-append-to-body="true" ng-bind = "c.component">
+                                            {{c.component}}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-3" ng-if="!os.ubuntu" style="white-space: nowrap;">
+                                        {{c.version}}
+                                    </div>
+                                    <div class="col-md-4 col-sm-4 col-xs-4" ng-if="os.ubuntu" style="white-space: nowrap;">
+                                        {{c.version}}
+                                    </div>
+                                    <div class="col-md-1 col-sm-1 col-xs-1" ng-if="!os.ubuntu">
+                                        <i style="color:green;" class="fa fa-check-circle-o fa-2x " ng-if="c.status == 'Installed' && c.removing == undefined || c.status == 'NotInitialized' && c.removing == undefined && c.init == undefined && c.status" ng-hide="c.showingSpinner"></i>
+                                        <i style="margin-left: 20px;" class='fa fa-spinner fa-2x  fa-pulse' ng-if="c.removing || c.init || c.showingSpinner">
+                                        </i>
+                                    </div>
+                                    <div ng-if="!os.ubuntu" class="col-md-2 col-sm-2 col-xs-2" style="padding-left: 10px; margin-top: -7px;">
+                                        <a class="btn btn-default" style="width: 75px;" ng-click="pgdgAction( 'install', c.component) " ng-if="c.status == 'NotInstalled' || c.status == ''" ng-disabled=" c.showingSpinner">Install</a>
+                                        <a class="btn btn-default" style="width: 75px;" ng-click="pgdgAction( 'remove', c.component) " ng-if="c.status == 'Installed'" ng-disabled=" c.showingSpinner">Remove</a>
+                                    </div>
+                                    <div ng-if="os.ubuntu" class="col-md-3 col-sm-3 col-xs-3" style="margin-top: -7px; white-space: nowrap;">
+                                        <button class="btn btn-default" ng-click="pgdgAction( 'install', c.component) " ng-disabled=" c.showingSpinner">Install</button>
+                                        <button class="btn btn-default" ng-click="pgdgAction( 'remove', c.component) " ng-disabled=" c.showingSpinner">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-0 col-xs-0"></div>
+                </div>
+            </div>
+        </div>
+        </uib-tab>
+    </uib-tabset>
+</section>

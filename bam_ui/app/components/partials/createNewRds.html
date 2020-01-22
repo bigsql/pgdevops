@@ -1,0 +1,387 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">Create New RDS Instance</h4>
+</div>
+<div class="modal-body" class="create-rds-modal">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+    <div ng-if="firstStep && !loading">
+        <div class="row">
+            <div class="col-sm-2" style="margin-right: -100px; margin-top: 5px; margin-left:10px;"><strong>Region :</strong> </div>
+            <div class="col-sm-4">
+                <select class="form-control"  ng-change="regionChange(regionSelect.region)" ng-options="region.region as region.location for region in regions" ng-model="data.region"></select>
+            </div>
+        </div>
+        <div class="box-header">
+            <strong>Do you plan to use this database for production purpose?</strong>
+        </div>
+        <div class="box-body">
+            <div class="col-md-12" ng-init="InstanceType=2">
+                <div class="col-md-6">
+                    <div class="box-header">
+                       <strong>Production</strong>
+                    </div>
+                    <div class="box-body create-rds-prod">
+                        <label><input type="radio" name="isProd" value="1" ng-model="InstanceType" ng-disabled="true">&nbsp; PostgresSQL</label>
+                        <br />
+                        <div style="margin-left:20px;">
+                            Use Multi-AZ Deployment and Provisioned IOPS Storage as defaults for high availability and fast, consistent performance.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box-header">
+                       <strong>Dev/Test</strong>
+                    </div>
+                    <div class="box-body create-rds-dev-test">
+                        <label><input type="radio" value="2" ng-model="InstanceType" name="isProd">&nbsp; PostgresSQL</label>
+                        <br />
+                        <div style="margin-left:20px;">
+                            This instance is intended for use outside of production or under the RDS Free Usage Tier.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="secondStep && !loading">
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Instance Specifications</strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">DB Engine :</label>
+                    <div class="col-sm-8" style="margin-top:4px;">
+                        {{data.engine}}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">License Model :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="db.licence_model">
+                            <option value="">postgresql-license</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">DB Engine Version:</label>
+                    <div class="col-sm-8">
+                        <select class="form-control"  ng-change="versionChange()" ng-model="data.engine_version">
+                            <option ng-repeat="ver in dbEngVersions" value="{{ver.EngineVersion}}">{{ver.DBEngineVersionDescription}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">DB Instance Class :</label>
+                    <div class="col-sm-8" ng-if="!disableInsClass">
+                        <select class="form-control" ng-change="typeChange(typeSelect.type)" ng-model="data.db_class">
+                            <option ng-repeat="type in types" value="{{ type.DBInstanceClass }}" ng-if="!type.v_cpu">
+                                {{type.DBInstanceClass}}  
+                            </option>
+                            <option ng-repeat="type in types" value="{{ type.DBInstanceClass }}" ng-if="type.v_cpu">
+                                {{type.DBInstanceClass}} -- {{type.v_cpu}}(vCPU), {{type.memory}} GiB RAM  
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="disableInsClass"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Multi-AZ Deployment :</label>
+                    <div class="col-sm-3">
+                        <select class="form-control" ng-model="data.multi_az" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Storage Type :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="data.storage_type">
+                            <option value="gp2">General Purpose (SSD)</option>
+                            <option value="io2">Provisioned IOPS (SSD)</option>
+                            <option value="standard">Magnetic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Allocated Storage :</label>
+                    <div class="col-sm-2">
+                        <input type="number" id="allocStroage" class="form-control" value="{{data.allocated_storage}}" ng-model="data.allocated_storage" name="">
+                    </div>
+                    <div class="col-sm-2" style="margin-left: -25px; margin-top: 8px;"><strong>GB</strong></div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Settings </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">DB Instance Identifier:</label>
+                    <div class="col-sm-8">
+                        <input type="text" id="dbClass" class="form-control" ng-model="data.instance" value="{{data.instance}}" name="" placeholder="Database Class">
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label class="col-sm-4 control-label">Master User:</label>
+                    <div class="col-sm-8">
+                        <input type="text" id="userName" class="form-control" ng-model="data.master_user" value="{{data.master_user}}" name="" placeholder="User Name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Master Password:</label>
+                    <div class="col-sm-8">
+                        <input type="password"  class="form-control" id="password" value="{{data.password}}" name="password" ng-model="data.password" placeholder="Password" ng-minLength="8" ng-maxLength="41" required />
+                        <p style="color: red;" ng-if="initForm.password.$invalid && initForm.password.$dirty">Password contain from 8 to 41 characters.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Confirm Password:</label>
+                    <div class="col-sm-8">
+	                    <input type="password" class="form-control" id="password_c" name="password_c" value="{{data.password_c}}" ng-model="data.password_c" placeholder="Password" valid-password-c required  />
+                        <p style="color: red;" ng-show="!initForm.password_c.$error.required && initForm.password_c.$error.noMatch && initForm.password.$dirty">Passwords do not match.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div ng-if="thirdStep && !loading" class="row">
+        <div class="col-md-12">
+         <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Network & Security </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" ng-if="thirdStep">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">VPC :</label>
+                    <div class="col-sm-5">
+                        <select class="form-control" ng-model="vpc.select" ng-change="vpcChange()">
+                            <option ng-repeat="dat in networkSec" value="{{dat.vpc}}">{{dat.vpc}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Subnet Group:</label>
+                    <div class="col-sm-8">
+                        <input type="text" id="sbGroup" class="form-control" ng-model="data.subnet_group" value="{{data.subnet_group}}" name="" placeholder="Subnet Group">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Publicly Accessible : </label>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="data.public_accessible" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Availability Zone : </label>
+                    <div class="col-sm-8">
+                        <select class="form-control" ng-model="data.availability_zone">
+                            <option ng-repeat="zone in availableZones" value="{{zone.name}}">{{zone.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">VPC Security Group(s) : </label>
+                    <div class="col-sm-8" ng-model="data.vpc_security_group_ids">
+                        <select class="form-control" id="leftValues" size="5" multiple>
+                            <option value="">default (VPC)</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+            <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Database Options </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" ng-if="thirdStep">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Database Name:</label>
+                    <div class="col-sm-7">
+                        <input type="text" id="dbName" class="form-control" ng-model="data.db_name" name="" value="{{data.db_name}}" placeholder="Database Name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Database Port:</label>
+                    <div class="col-sm-7">
+                        <input type="number" id="port" class="form-control" ng-model="data.port" value="{{data.port}}" name="" placeholder="Port">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">DB Parameter Group :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="data.db_parameter_group" ng-options="db.DBParameterGroupName as db.DBParameterGroupName for db in dbGroups"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Option Group :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="data.option_group" ng-options="option.OptionGroupName as option.OptionGroupName for option in optionGroups"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Copy Tags To Snapshots :</label>
+                    <div class="col-sm-7">
+                        <input type="checkbox" ng-model="data.copy_tags">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Enable Encryption : </label>
+                    <div class="col-sm-3">
+                        <select class="form-control" ng-model="data.storage_encrypted" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Monitoring </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" ng-if="thirdStep">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Enable Enhanced Monitoring : </label>
+                    <div class="col-sm-3">
+                        <select class="form-control" ng-model="data.enable_mon" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" ng-if="data.enableMon == true">
+                    <label class="col-sm-5 control-label"> Monitoring Role : </label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="data.monitor_arn">
+                            <option value="Default">Default</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" ng-if="data.enableMon == true">
+                    <label class="col-sm-5 control-label"> Granularity : </label>
+                    <div class="col-sm-3">
+                        <select class="form-control" ng-model="data.monitoring_interval" ng-options="n for n in [0, 1, 5, 10,15,60]">
+                        </select>
+                    </div>
+                    <div class="col-sm-2" style="margin-left: -25px; margin-top: 8px;"><strong>second(s)</strong></div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Maintenance </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" ng-if="thirdStep">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Auto Minor Version Upgrade : </label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="data.version_upgrade" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Maintenance Window :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="maintanance.main_window_show">
+                            <option value="yes">Select Window</option>
+                            <option value="no">No Preference</option>
+                        </select>
+                        <div ng-if="maintanance.main_window_show == 'yes'">
+                            <div class="col-md-12">
+                            <label class="col-sm-4 control-label">Start Day :</label>
+                            <div class="col-sm-8">
+                                <select style="margin:5px;" ng-model="maintanance.main_window_day" ng-options="val as key for (key, val) in days">
+                                </select>
+                            </div>
+                            </div>
+                            <div class="col-md-12">
+                            <label class="col-sm-4 control-label">Start Time :</label>
+                            <div class="col-sm-3">
+                                <select style="margin:5px;" ng-model="maintanance.main_window_hours" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:25">
+                                </select>
+                            </div>
+                                <span class="col-sm-1" style="margin-top:5px;"><strong>:</strong></span>
+                            <div class="col-sm-2">
+                                <select style="margin:5px 5px 5px -21px;" ng-model="maintanance.main_window_mins" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:60">
+                                </select>
+                            </div>
+                            <div class="col-sm-1" style="margin-left: -11px; margin-top: 6px;">UTC</div>
+                            </div>
+                            <div class="col-md-12">
+                            <label class="col-sm-4 control-label">Duration :</label>
+                            <div class="col-sm-4">
+                                <select style="margin:5px;" ng-model="maintanance.main_window_duration" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:13">
+                                </select>
+                            </div>
+                                <div class="col-sm-2" style="margin-left: -11px; margin-top: 6px;">hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+            <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Backup </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" ng-if="thirdStep">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Backup Retention Period : </label>
+                    <div class="col-sm-3">
+                        <select class="form-control" ng-model="data.backup_retention_period" ng-options="n for n in [] | range:36">
+                        </select>
+                    </div>
+                    <div class="col-sm-2" style="margin-left: -25px; margin-top: 8px;"><strong>days</strong></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Backup Window:</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="backup.backup_window_show">
+                            <option value="yes">Select Window</option>
+                            <option value="no">No Preference</option>
+                        </select>
+                        <div ng-if="backup.backup_window_show == 'yes'">
+                            <div class="col-md-12">
+                            <label class="col-sm-4 control-label">Start Time :</label>
+                            <div class="col-sm-3">
+                                <select style="margin:5px;" ng-model="backup.backup_window_hours" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:25">
+                                </select>
+                            </div>
+                                <span class="col-sm-1" style="margin-top:5px;"><strong>:</strong></span>
+                            <div class="col-sm-2">
+                                <select style="margin:5px 5px 5px -21px;" ng-model="backup.backup_window_mins" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:60">
+                                </select>
+                            </div>
+                            <div class="col-sm-1" style="margin-left: -11px; margin-top: 6px;">UTC</div>
+                            </div>
+                            <div class="col-md-12">
+                            <label class="col-sm-4 control-label">Duration :</label>
+                            <div class="col-sm-4">
+                                <select style="margin:5px;" ng-model="backup.backup_window_duration" ng-options="('00'+n).slice(-2)  as ('00'+n).slice(-2)  for n in [] | range:13">
+                                </select>
+                            </div>
+                                <div class="col-sm-2" style="margin-left: -11px; margin-top: 6px;">hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    <div class="alert alert-danger" role="alert" ng-if="showErrMsg">
+        {{errMsg}}
+    </div>
+</div>
+<div class="modal-footer" ng-if="!loading">
+    <div class="pull-right">
+        <button class="btn btn-default" ng-if="!firstStep" ng-disabled="creating" ng-click="previous()">Previous</button>
+        <button class="btn btn-primary" ng-if="!thirdStep && secondStep" ng-disabled=" !data.master_user || !data.instance || !($root.initForm.password.$valid && $root.initForm.password.$viewValue == $root.initForm.password_c.$viewValue) || showErrMsg" ng-click="next()">Next Step</button>
+        <button class="btn btn-primary" ng-if="!thirdStep && !secondStep" ng-disabled="showErrMsg" ng-click="next()">Next Step</button>
+        <button class="btn btn-primary" ng-if="thirdStep" ng-disabled="creating || showErrMsg" ng-click="createRDS()"> <i ng-if="creating" class="fa fa-spinner fa-pulse"></i> Create</button>
+    </div>
+</div>

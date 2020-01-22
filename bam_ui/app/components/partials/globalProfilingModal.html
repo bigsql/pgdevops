@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h3 class="modal-title">Global Profiling</h3>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" class="uib-text" dismiss-on-timeout="8000">
+        {{alert.msg}}  
+</uib-alert>
+<div class="modal-body">
+<div ng-if="showStatus">Global Profiling is {{status.status}}</div>
+<br />
+<form class="form plProfiler-form" action="#">
+    <div class="form-group">
+        <a class="btn btn-lg btn-default" ng-click="enableProfiler()" ng-disabled="status.enabled">
+            <i class="fa fa-check fa-2x pull-left"></i> Enable
+        </a>
+        <a class="btn btn-lg btn-default" ng-click="disableProfiler()" ng-disabled="!status.enabled">
+            <i class="fa fa-ban fa-2x pull-left"></i> Disable
+        </a>
+        <a class="btn btn-lg btn-default" ng-click="resetProfiler()" uib-tooltip="Reset Global Profiling Statistics">
+            <i class="fa fa-refresh fa-2x pull-left"></i> Reset
+        </a>
+        <a class="btn btn-lg btn-default" ng-click="generateReport()">
+            <i class="fa fa-newspaper-o fa-2x pull-left"></i> View Report
+        </a>
+    </div>
+    <div class="form-group">
+        <div ng-class="{ 'alert alert-success' : result.action == 'enable', 'alert alert-danger' : result.action == 'disable', 'alert alert-warning' : result.action == 'reset'  }" role="alert" ng-if="showResult">
+            {{result.msg}}
+        </div> 
+    </div>
+    <div class="form-group">
+        <input type="text" ng-model="pgTitle" required class="form-control" placeholder="Report Title (Optional)">
+    </div>
+     <div class="form-group">
+        <input type="text" ng-model="pgDesc" class="form-control" placeholder="Report Desc (Optional)">
+    </div>
+</form>
+</div>
+<!-- <div class="modal-footer">
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Close</button>
+</div> -->

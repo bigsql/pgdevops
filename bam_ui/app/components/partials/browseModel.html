@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <div  class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-cog fa-spin fa-fw" ng-if="loading"></i>
+        <button type="submit" ng-click="selectFile(currentPath)" class="btn btn-primary">Select</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="fa fa-lg fa-close cursor_pointer" ng-click="cancel()"></i>
+    </div>
+    <h4 class="modal-title">{{title}}</h4>
+    <p style="display:inline-block"><span>{{userName}}@{{hostIp}}:</span><span class="ellipses-4x"><a ng-repeat="path in getNavigateLinks(currentPath) track by $index" ng-click="navigateBack($index,currentPath)" style="cursor: pointer;" ng-if="path!=''">&nbsp;/{{path}}</a></span></p>
+
+</div>
+<div class="modal-body browse-window" style="padding-top: 8px;">
+  <div class="alert alert-danger" role="alert" ng-if="errorMsg">
+      {{errorMsg}}
+  </div>
+  <div class="row">
+    <div class="col=md-12" ng-if="errorText" style="padding-left: 20px;">{{errorText}}</div>
+    <div class="col-md-12">
+        <div class="col-sm-8" ng-if="files.length>0" style="padding-left: 20px;"><b>Name</b></div><div class="col-sm-4" ng-if="files.length>0" style="padding-left: 20px;"><b>Last Accessed</b></div>
+    </div>
+    <div ng-repeat="file in files" ng-class="(file.type == 'd') ? 'directory' : 'file'" class="col-md-12" ng-click="getFiles(file.name,file.type)" style="margin: 2px 2px 6px 6px;cursor: pointer;">
+       <div class="col-sm-8" ng-if="file.type != '.'"><span ng-class="(file.type == 'd') ? 'fa fa-folder-open fa-1x directory-img' : 'fa fa-file fa-1x file-img'"></span>&nbsp;&nbsp;{{ getName(file.name) }}</div><div class="col-sm-4" ng-if="file.type != '.'"> {{ file.last_accessed }}</div>
+       <div class="col-sm-8" ng-if="file.type == '.'"><span class="fa fa-arrow-left fa-1x parent-img"></span>&nbsp;&nbsp;Parent Directory </div><div class="col-sm-4" ng-if="file.type == '.'"> {{ file.last_accessed }}</div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+    <!--<button type="submit" ng-click="selectFile(currentPath)" class="btn btn-primary">Select</button>
+    <button type="submit" ng-click="cancel()" class="btn btn-danger pull-right">Cancel</button>-->
+</div>

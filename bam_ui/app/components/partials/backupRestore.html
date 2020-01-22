@@ -1,0 +1,260 @@
+<script type="text/ng-template" id="alert.html">
+    <div class="alert" style="background-color:#fa39c3;color:white;" role="alert">
+        <div ng-transclude></div>
+    </div>
+</script>
+<div class="uib-text" uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+        <div ng-bind-html="alert.msg"></div>
+    </div>
+<section class="content">
+    <div ng-if="loading" class="loadingSpinner">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+   <uib-tabset ng-if="!loading">
+        <uib-tab heading="Backup" active="activeBackup">
+            <uib-tab-heading>
+              <div style="text-align: center;">Backup Database</div>
+            </uib-tab-heading>
+            <div class="box" style="border-top: 0px;">
+            <div class="box-body">
+                <div class="row container">
+                    <form class="form-horizontal" id="backupForm" ng-submit="checkFileExistense()">
+                        <div class="col-md-6" style="border-right: 1px solid #f4f4f4;">
+                            <div class="box-header with-border">
+                                <div class="col-md-12"><h4><strong> Direct PostgreSQL Connection </strong></h4></div>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">PG Connection:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <select class="form-control" id="dbBackupPgcListDropDown" ng-model="backup.pgc" ng-change="onPGCChange(backup.pgc,'backup')" required>
+                                        <option ng-repeat="pgc in pgListRes" value="{{ pgc.server_name }}"><h3>[{{ pgc.server_name }}] {{pgc.db_user}}@{{pgc.host}}:{{pgc.port}}/{{pgc.db}} </h3> </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Host:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.hostname" class="form-control" placeholder="Host" data-fv-field="ip" data-fv-ip-message="Please enter a valid IP address" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Port:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.port" class="form-control" placeholder="Port" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">DB:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.dbname" class="form-control" placeholder="Database" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">User:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.user" class="form-control" placeholder="User" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Password:</label>
+                                <div class="col-sm-7">
+                                    <input type="password" ng-model="backup.password" class="form-control" placeholder="Password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-header with-border">
+                                <div class="col-md-12"><h4><strong>Target Backup Server</strong></h4></div>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">SSH Server:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <select class="form-control" id="dbBackupServerInfoDropDown" ng-model="backup.sshserver" ng-change="onSSHServerChange(backup.sshserver,'backup')" required>
+                                        <option ng-repeat="host in hosts" value="{{ host.name != null ? host.name : host.host }}"><h3>{{ host.name }} </h3>   ({{ host.host }}), {{host.hostInfo.os}}, {{host.hostInfo.mem}} GB, {{ host.hostInfo.cores }} Core(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group ">
+                                <label class="col-sm-4 control-label">Directory:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-6" style="padding-right: 0px;">
+                                    <input type="text" ng-model="backup.directory" class="form-control" placeholder="Directory" tooltip-append-to-body="true" uib-tooltip="{{backup.directory}}" style="direction: rtl;" tooltip-class="logDataDirHover" required readonly/>
+                                </div>
+                                <div class="input-group-btn col-md-2" style="padding-left: 0px;">
+                                    <button class="browse btn btn-primary btn-sm" type="button" ng-click="getFiles(backup.directory,'backup')">
+                                        <i class="glyphicon glyphicon-search" style="height:20px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Filename:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.filename" class="form-control" placeholder="Filename" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Format:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <select class="form-control" id="dbBackupFormatDropDown" ng-model="backup.format" required>
+                                        <option value="c">c - custom (binary compressed)</option>
+                                        <option value="d">d - directory (parallel capable)</option>
+                                        <option value="p">p - plain text (.sql file)</option>
+                                        <option value="t">t - tar (old school compressed)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Advanced Options:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="backup.advoptions" class="form-control" placeholder="Advanced Options">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 box-header with-border"></div>
+                        <div class="col-md-12"><br></div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-sm-5"></div>
+                                <div class="col-sm-5">
+                                    <button type="submit" ng-disabled= "!backupRestoreFeature || loadingBackupAction" class="btn btn-primary"><i class="fa fa-cog fa-spin fa-fw" ng-if="loadingBackupAction"></i>&nbsp;Start Backup...</button>
+                                    <b>&nbsp;&nbsp;<a ng-click="navigate('#/components/jobs')" class="notification" style="cursor: pointer;">View Recent Jobs<span class="num" ng-if="$root.runningJobsCount>0">{{$root.runningJobsCount}}</span></a></b>
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </uib-tab>
+        <uib-tab heading="PostgreSQL" ng-click="restoreDataBaseClick()">
+            <uib-tab-heading>
+              <div style="text-align: center;">Restore Database</div>
+            </uib-tab-heading>
+            <div class="box" style="border-top: 0px;">
+            <div class="box-body">
+                <div class="row">
+                    <form class="form-horizontal" id="restoreForm" ng-submit="startRestore()">
+                        <div class="col-md-6" style="border-right: 1px solid #f4f4f4;">
+                            <div class="box-header with-border">
+                                <div class="col-md-12"><h4><strong>Source Backup Server </strong></h4></div>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">SSH Server:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <select class="form-control" id="serverInfoDropDown" ng-model="restore.sshserver" ng-change="onSSHServerChange(restore.sshserver,'restore')" required>
+                                        <option ng-repeat="host in hosts" value="{{ host.name != null ? host.name : host.host }}"><h3>{{ host.name }} </h3>   ({{ host.host }}), {{host.hostInfo.os}}, {{host.hostInfo.mem}} GB, {{ host.hostInfo.cores }} Core(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Backup File:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-6" style="padding-right: 0px;" uib-tooltip="{{restore.directory}}" tooltip-append-to-body="true" tooltip-class="logDataDirHover">
+                                    <input type="text" ng-model="restore.directory" class="form-control" placeholder="Backup File" style="direction: rtl;" required readonly>
+                                </div>
+                                <div class="input-group-btn col-md-2" style="padding-left: 0px;">
+                                    <button class="browse btn btn-primary btn-sm" type="button" ng-click="getFiles(backup.directory,'restore')">
+                                        <i class="glyphicon glyphicon-search" style="height:20px"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!--<div class="form-group">
+                                <label class="col-sm-4 control-label">Filename:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.filename" class="form-control" placeholder="Filename">
+                                </div>
+                            </div>-->
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Format:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <select class="form-control" id="dbRestoreFormatDropDown" ng-model="restore.format" ng-change="onFormatChange(restore.format,'restore')" required>
+                                        <option value="c">c - custom (binary compressed)</option>
+                                        <option value="d">d - directory (parallel capable)</option>
+                                        <option value="p">p - plain text (.sql file)</option>
+                                        <option value="t">t - tar (old school compressed)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Advanced Options:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.advoptions" class="form-control" placeholder="Advanced Options">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-header with-border">
+                                <div class="col-md-12"><h4><strong>Target PostgreSQL Connection</strong></h4></div>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">PG Connection:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                     <select class="form-control" id="dbRestorePgcListDropDown" ng-model="restore.pgc" ng-change="onPGCChange(restore.pgc,'restore')" required>
+                                        <option ng-repeat="pgc in pgListRes" value="{{ pgc.server_name }}"><h3>[{{ pgc.server_name }}] {{pgc.db_user}}@{{pgc.host}}:{{pgc.port}}/{{pgc.db}} </h3> </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Host:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.hostname" class="form-control" placeholder="Host" data-fv-field="ip" data-fv-ip-message="Please enter a valid IP address" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Port:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.port" class="form-control" placeholder="Port" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">DB:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.dbname" class="form-control" placeholder="Database" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">User:<span class="requiredSymbol">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" ng-model="restore.user" class="form-control" placeholder="User" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Password:</label>
+                                <div class="col-sm-7">
+                                    <input type="password" ng-model="restore.password" class="form-control" placeholder="Password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 box-header with-border"></div>
+                        <div class="col-md-12"><br></div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-sm-5"></div>
+                                <div class="col-sm-5">
+                                    <button type="submit" ng-disabled= "!backupRestoreFeature || loadingRestoreAction" class="btn btn-primary"><i class="fa fa-cog fa-spin fa-fw" ng-if="loadingRestoreAction"></i>&nbsp;Start Restore...</button>
+                                    <b>&nbsp;&nbsp;<a ng-click="navigate('#/components/jobs')" class="notification" style="cursor: pointer;">View Recent Jobs<span class="num" ng-if="$root.runningJobsCount>0">{{$root.runningJobsCount}}</span></a></b>
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+                            </div>
+                        </div>
+                        </form>
+                    <div class="col-md-3"></div>
+                </div>
+            </div>
+            </div>
+    </uib-tab>
+   </uib-tabset>
+
+    <div ng-show="showBackupBgProcess">
+        <background-process-alert title="Backup Database"></background-process-alert>
+    </div>
+</section>

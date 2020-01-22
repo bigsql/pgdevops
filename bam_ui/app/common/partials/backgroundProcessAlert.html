@@ -1,0 +1,38 @@
+<div class="btask-wrapper">
+     <div id="btask-tab-pullout" class="btask--tab-pullout"><i class="fa fa-chevron-right fa-2x" aria-hidden="true"></i></div>
+     <div id="btask-console-hidden" class="btask--stdout-stderr">
+         <div class="btask--stdout-stderr---header">
+           <h5>Console</h5>
+         </div>
+         <div class="btask--stdout-stderr---body">
+            <div ng-if="out_data" class="console" id="bg_console">
+              {{out_data}}              
+            </div>
+            <div ng-if="out_data==false" class="console">
+                Connecting...
+            </div>
+         </div>
+     </div>
+     <div class="btask">
+       <div class="btask--header">
+         <h5>{{ title }} Background Task ID #{{taskID}} <i class="fa fa-lg fa-close pull-right" ng-if="procCompleted" style="margin-right: 10px;" ng-click="cancel(taskID)"></i></h5>
+       </div>
+       <div class="btask--body">
+         <div class="row">
+            <div class="col-md-12">
+                 <div ng-if="!procCompleted && process_type != 'backup' && process_type != 'restore'" class="bt-state">Generating Report …</div>
+                 <div ng-if="generatedFile" class="bt-status">
+                   File : <a target="_blank" href="reports/{{generatedFile}}">{{generatedFileName}}</a>
+                 </div>
+                 <br>
+                 <div ng-if="cmdAllowedTypes.indexOf(process_type) != -1 && procCmd" class="bt-status">Command: {{procCmd}} <br></div>
+                 <div ng-if="procStartTime" class="bt-start-time">Start time: {{procStartTime}} </div>
+                 <div ng-if="procEndTime" class="bt-start-time">End time&nbsp;: {{procEndTime}} </div>
+                <div ng-if="procStatus" class="bt-status"><b>Status: {{procStatus}}</b></div>
+                 <div ng-if="error_msg" class="bt-status">Error: {{error_msg}}</div>
+                 <div ng-if="procId && !procCompleted" class="bt-status">PID: {{procId}}</div>
+
+             </div>
+         </div>
+       </div>
+   </div>

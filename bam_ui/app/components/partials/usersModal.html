@@ -1,0 +1,49 @@
+<div class="modal-header">
+    <h4 class="modal-title" id="updateModalLabel"> User Management</h4>
+</div>
+<div ng-click="cancel()" class="close-modal" data-dismiss="modal" aria-hidden="true">
+    <div class="lr">
+        <div class="rl">
+        </div>
+    </div>
+</div>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert()" class="uib-text">{{alert.msg}}</uib-alert>
+
+<div class="container-fluid" ng-show="loadingSpinner">
+    <div class="row">
+        <div class="col-md-12 col-xs-12">
+            <div class="well">
+                <i class="fa fa-spinner fa-2x  fa-pulse"></i>&#160;&#160;&#160;Checking for users..
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-body">
+            <div class="row">
+                <span class="pull-right cursor_pointer" ng-click="addAuserForm()">
+                    <i class="fa fa-user-plus" aria-hidden="true"></i>  
+                    <strong>Add User</strong> &nbsp;&nbsp;
+                </span>     
+            </div>
+            <br />
+            <div class="row" >
+                <div class="col-md-1 col-xs-1"><strong></strong></div>
+                <div class="col-md-4 col-xs-4"><strong>Email</strong></div>
+                <div class="col-md-2 col-xs-2"><strong>Role</strong></div>
+                <div class="col-md-1 col-xs-1"><strong>Active</strong></div>
+                <div class="col-md-2 col-xs-2"><strong>New Password</strong></div>
+                <div class="col-md-2 col-xs-2"><strong>Confirm Password</strong></div>
+            </div>
+            <div class="row" id="updatesTableTbody " ng-repeat="(key, value) in users">
+                
+                <user-details-row roles="roles" value="value"></user-details-row> 
+                
+            </div>
+
+        <!-- /.box -->
+        <!-- /.box -->
+</div>
+<div class="modal-footer">
+    <button class="btn btn-danger" type="button" ng-click="cancel()">Close</button>
+</div>

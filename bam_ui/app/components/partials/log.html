@@ -1,0 +1,74 @@
+<section class="content-header">
+    <server-info-details title="Log Tailer"></server-info-details>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    <form id="log-tail-filters" class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                            <label class="comp-select" for="select-component-log" ng-if="allowedJobTypes.indexOf(logViewType) == -1">Component:</label>
+                            <label class="comp-select" for="select-component-log" ng-if="allowedJobTypes.indexOf(logViewType) >= 0">Job Type :</label>
+                            <div class="col-sm-8" id="componentSelectBox">
+                                <select class="form-control" id="logComponents" ng-change="onLogCompChange()" ng-model="selectComp">
+                                     <option value="pgcli">pgcli</option>
+                                     <option value="{{c.component}}" ng-repeat="c in components">{{c.component}}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-8" ng-if="allowedJobTypes.indexOf(logViewType) >= 0" style="padding-top: 2%;">
+                                <span>{{jobTypesMapping[logViewType]}}</span>
+                            </div>
+                            </div>
+                            <div class="col-sm-6">
+                            <div id="log-lines">
+                            <p class="log-lines-label"><strong>Log Lines: </strong></p>
+                            <ul class="nav nav-pills">
+                                <li ng-class="{active:isSet(100)}">
+                                    <a href ng-click="setTab(100) ; action(100)">{{ 100 | number:0 }}</a>
+                                </li>
+                                <li ng-class="{active:isSet(1000)}">
+                                    <a href ng-click="setTab(1000); action(1000)">{{ 1000 | number:0 }}</a>
+                                </li>
+                                <li ng-class="{active:isSet(10000)}">
+                                    <a href ng-click="setTab(10000); action(10000)">{{ 10000 | number:0 }}</a>
+                                </li>
+                                <li ng-class="{active:isSet(100000)}">
+                                    <a href ng-click="setTab(100000); action(100000)">{{ 100000 | number:0 }}</a>
+                                </li>
+                            </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <!-- <input type="checkbox" value="checked" ng-model="checked" ng-checked="true" ng-click="stopScrolling($event)"> Auto Scroll</input> -->
+                            <div class="pull-right" ng-click="action(tab)"> <i class="fa fa-refresh fa-fw"></i>Refresh</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12" ng-if="allowedJobTypes.indexOf(logViewType) == -1">
+                                <strong> Log File :</strong>&nbsp;&nbsp;<span>{{selectedLog}}</span>
+                            </div>
+                            <div class="col-md-12" ng-if="allowedJobTypes.indexOf(logViewType) >= 0">
+                                <strong> Log Directory :</strong>&nbsp;&nbsp;<span>{{logDir}}</span>
+                            </div>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body" style="overflow: auto;">
+                    <div style="background-color: #fff; height: 400px; overflow: auto;" id="logviewer">
+                        <ol>
+                            <li ng-repeat="logLine in logFile track by $index">{{logLine}}</li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+            <!-- /.box -->
+        </div>
+    </div>
+</section>

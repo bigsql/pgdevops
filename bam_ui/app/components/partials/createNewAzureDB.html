@@ -1,0 +1,121 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">Create Azure PostgreSQL Instance</h4>
+</div>
+<div class="modal-body" class="create-rds-modal">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+    <div ng-if="firstStep && !loading" class="row">
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Instance Specifications </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Region :</label>
+                    <div class="col-sm-8">
+                        <!-- <select class="form-control" id="select-region"  ng-change="regionChange(regionSelect.region)" ng-model="data.region">
+                            <option value="">--select--</option>
+                            <option value="southcentralus">South Central US</option>
+                        </select> -->
+                        <select class="form-control" id="select-region"  ng-change="regionChange()" ng-model="data.region" ng-options="region.region as region.location for region in regions">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Instance Name :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control form-control-success" value="{{data.instance}}" name="instance" ng-model="data.instance" required ng-change="validateInsName(data.instance)" ng-class="instanceNameValid? '' : 'back-red'" uib-tooltip="Instance name should not contain upper case and special characters." placeholder="Name" tooltip-enable="!instanceNameValid" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Master User :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" ng-change="validateUserName(data.master_user)" id="master_user" placeholder="User" ng-model="data.master_user" ng-class="userNameValid? '' : 'back-red'" uib-tooltip="User name shouldn't contain any special characters or numbers." tooltip-enable="!userNameValid"></input>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Password :</label>
+                    <div class="col-sm-8">
+                        <input type="password" id="password" class="form-control form-control-success" value="{{data.password}}" name="password" ng-model="data.password" placeholder="Password" ng-minLength="12" ng-maxLength="72" required ng-change="validationInputPwdText(data.password)" ng-class="pwdValid? '' : 'back-red'" uib-tooltip="Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character that is not '\', '#', '%' or '-'. Value must be between 12 and 72 characters long. Your password cannot contain all or part of the master user name. Part of a master user name is defined as three or more consecutive alphanumeric characters." tooltip-enable="!pwdValid" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Confirm Password :</label>
+                    <div class="col-sm-8">
+                        <input type="password" class="form-control" id="password_c" name="password_c" value="{{data.password_c}}" ng-model="data.password_c" placeholder="Password" valid-password-c required  />
+                        <p style="color: red;" ng-show="!initForm.password_c.$error.required && initForm.password_c.$error.noMatch && initForm.password.$dirty">Passwords do not match.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Group Name :</label>
+                    <div class="col-sm-8" ng-if="!loadingResGroups">
+                        <select class="form-control" id="group_name" ng-model="data.group_name">
+                            <option value="">--select--</option>
+                            <option ng-repeat="res_group in res_groups" value="{{ res_group.name }}">
+                                {{res_group.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingResGroups"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Engine Version :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="engine_version" ng-model="data.engine_version">
+                            <option value="">--select--</option>
+                            <option value="9.6">Postgres 9.6</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Connection security</strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Enforce SSL :</label>
+                    <div class="col-sm-8">
+                        <input type="radio" ng-model="data.ssl_mode" value="Enabled"> Enable
+                        <input type="radio" ng-model="data.ssl_mode" value="Disabled"> Disable
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Publicly Accessible :</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" ng-model="data.publicly_accessible" ng-change="changePubAcs()"  name="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Default Firewall :</label>
+                    <div class="col-sm-4">
+                        <input type="text" ng-disabled="data.publicly_accessible" class="form-control" id="start_ip" ng-model="data.start_ip" placeholder="START IP"></input>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" ng-disabled="data.publicly_accessible" class="form-control" id="end_ip" ng-model="data.end_ip" placeholder="END IP"></input>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+    <div class="alert alert-danger" role="alert" ng-if="showErrMsg">
+        {{errMsg}}
+    </div>
+</div>
+<div class="modal-footer" ng-if="!loading">
+    <div class="pull-left" ng-if="creating">
+        <span> <i class="fa fa-spinner fa-2x  fa-pulse"></i> {{creatingAzureDB}}</span>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-primary" ng-if="firstStep" ng-disabled="creating || !pwdValid || !instanceNameValid || !data.group_name || !data.engine_version || !userNameValid || !instanceNameValid" ng-click="createVM()">
+           Create
+        </button>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<div class="modal-header">
+    <h2 class="modal-title" id="updateModalLabel">Setup {{comp}}</h2>
+</div>
+<div class="modal-body">
+	Please provide a password for the superuser (postgres) database user
+	<br>
+	<br>
+	<form class="form-horizontal" name="initForm">
+	  <div class="form-group">
+	    <label for="password" class="col-sm-4 control-label">Password</label>
+	    <div class="col-sm-6">
+	      <input type="password"  class="form-control" id="password" name="password" ng-model="formData.password" ng-disabled="initializing" required />
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="password_c" class="col-sm-4 control-label">Retype Password</label>
+	    <div class="col-sm-6">
+	      <input type="password" class="form-control" id="password_c" name="password_c" ng-model="formData.password_c"  ng-disabled="initializing"valid-password-c required  />
+	      <span ng-show="!initForm.password_c.$error.required && initForm.password_c.$error.noMatch && initForm.password.$dirty">Passwords do not match.</span>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	  	<label for="dataDir" class="col-sm-4 control-label">Data Directory</label>
+	  	<div class="col-sm-6">
+	  		<input type="text" class="form-control" name="dataDir" ng-disabled="true" ng-model="dataDir" />
+	  	</div>
+	  </div>
+	  <div class="form-group">
+	  		<label for="portNumber" class="col-sm-4 control-label">Port Number</label>
+	  		<div class="col-sm-6">
+	  			<input type="text" class="form-control" id="portNumber" ng-disabled="initializing" name="portNumber" ng-model="portNumber" value="{{initForm.portNumber.$viewValue}}" valid-port />
+	  			<span ng-show="!!initForm.portNumber.$error.invalidLen">Port must be between 1000 and 9999.</span>
+	  		</div>
+	  </div>
+	  <div class="form-group">
+	  		<label for="autoStart" class="col-sm-4 control-label">Auto Start</label>
+	  		<div class="col-sm-6 autostart-input">
+	  			<input type="checkbox" ng-model="autostart.value" ng-disabled="autostartDisable || initializing" ng-change="autostartChange(autostart)" />
+	  		</div>
+	  </div>
+	  <div class="form-group">
+	    <div class="col-sm-offset-8 col-sm-10">
+	    	<button ng-if="!initializing" class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+			<button ng-if="!initializing" type="submit" class="btn btn-primary" ng-disabled="!(initForm.password.$valid && initForm.password.$viewValue == initForm.password_c.$viewValue)" ng-click="init() ">Start</button>
+			<span ng-if="initializing"><i class='fa fa-spinner fa-2x  fa-pulse'></i>&nbsp;Starting..</span>
+	    </div>
+	  </div>
+	</form>
+</div>

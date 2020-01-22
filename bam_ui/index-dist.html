@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bigSQL">
+
+<head>
+    <meta charset="UTF-8">
+    <title>pgDevOps by OpenSCG</title>
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+      <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="assets/img/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="assets/img/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="assets/img/manifest.json">
+<link rel="mask-icon" href="assets/img/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="assets/img/favicon.ico">
+<meta name="msapplication-config" content="assets/img/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" type="text/css" href="vendor-css.css">
+    <link rel="stylesheet" type="text/css" href="bigSQL.min.css">
+    <script src="m/modernizr.js"></script>
+</head>
+
+<body class="hold-transition skin-black sidebar-mini sidebar-collapse">
+    <div id="meta-wrapper" ng-controller="BigSqlController">
+        <dev-ops-update></dev-ops-update>
+        <div class="wrapper">
+            <!--Top menu and Left menu are components written in Angular 1.5-->
+            <top-menu></top-menu>
+            <!-- Left side column. contains the logo and sidebar -->
+            <left-menu></left-menu>
+            <div class="content-wrapper" style="min-height: 419px;">
+                <div ui-view="main "></div>
+            </div>
+            <footer class="main-footer">
+                <div class="pull-right hidden-xs">
+                    <b>Version</b> bam_version_number
+                </div>
+                <strong>Copyright &copy; 2017 <a href="https://www.openscg.com/">OpenSCG</a>.</strong> All rights reserved.
+            </footer>
+            <!-- Control Sidebar -->
+            <aside class="control-sidebar control-sidebar-dark">
+                <!-- Create the tabs -->
+                <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+                    <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+                    <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <!-- Home tab content -->
+                    <div class="tab-pane" id="control-sidebar-home-tab">
+                    </div>
+                    <!-- /.tab-pane -->
+                    <!-- Settings tab content -->
+                    <div class="tab-pane" id="control-sidebar-settings-tab">
+                    </div>
+                    <!-- /.tab-pane -->
+                </div>
+            </aside>
+            <div class="control-sidebar-bg"></div>
+        </div>
+    </div>
+    <script>
+    var hasWebsockets = Modernizr.websockets;
+
+    if (!hasWebsockets) {
+        var badBrowserModal = '<div class="warning-modal-wrapper">' +
+            '    <div class="modal-popup">' +
+            '        <h1>Your browser is not supported</h1>' +
+            '        <p>You can use BigSQL Manager II with a modern browser. Click on an icon to download one below.</p>' +
+            '        <div>' +
+            '        <a target="_blank" href="https://www.google.com/chrome/browser/desktop/index.html"><img class="chrome-icon" src="assets/img/chrome_logo.png" alt=""></a>' +
+            '        <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/"><img class="firefox-icon" src="assets/img/firefox_logo.png" alt=""></a>' +
+            '        <a target="_blank" href="https://www.microsoft.com/en-in/download/Internet-Explorer-11-for-Windows-7-details.aspx"><img class="ie11-icon" src="assets/img/ie11_logo.png" alt=""></a>' +
+            '        </div>' +
+            '    </div>' +
+            '</div>';
+
+
+        var el = document.getElementById("meta-wrapper");
+        el.innerHTML = badBrowserModal;
+    }
+    </script>
+    <script type="text/javascript" src="vendor-scripts.min.js"></script>
+    <script type="text/javascript" src="templates.js"></script>
+    <script src="app-scripts.min.js"></script>
+</body>
+
+</html>

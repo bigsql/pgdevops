@@ -1,0 +1,137 @@
+<section class="content-header">
+    <h1 class="components-update-title-wrapper">
+        pgBadger Console
+    </h1>
+</section>
+
+<section class="content">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" class="uib-text">
+        {{alert.msg}}  
+        <a ng-click="clearCookies(); openDetailsModal()" class="cursor_pointer" ng-if="!alert.pgComp && !alert.devRole">Click here to install</a> 
+        <a ui-sref="components.view" ng-click="clearCookies()" class="cursor_pointer" ng-if="alert.pgComp && !alert.devRole">Click here to install</a>
+    </uib-alert>
+     <div class="row">
+    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <div class="col-md-12">
+                    <strong class="pull-left"> Settings</strong>
+                    <a class="pull-right" ng-click="openDetailsModal()">About pgBadger</a>
+                </div>
+            </div>
+            <div class="box-body">
+                <form class="form plProfiler-form">
+                    <div class="form-group">
+                        <div class="col-md-3 col-sm-3 col-xs-3">
+                            <select class="form-control" id="logComponents" ng-model="selectComp" ng-change="onSelectChange(selectComp)">
+                                <option value="">Select DB</option>
+                                <option value="{{c.component}}" ng-repeat="c in components">{{c.component}}</option>
+                            </select>
+                            <span class="required-pgbadger-form">*</span>
+                        </div>
+                        <div class="col-md-4 col-sm-4 col-xs-4" uib-tooltip="Switch Log File and Change Logging Parameters is not supported below Postgres 9.4" tooltip-enable="selectComp == 'pg93' || selectComp == 'pg92'">
+                            <button class="btn btn-default pull-right" ng-click="openSwitchlog()" ng-disabled="disableLog || selectComp == 'pg93' || selectComp == 'pg92' || pgNotRunning">Switch log file</button>
+                        </div>
+                        <div class="col-md-5 col-sm-5 col-xs-5" uib-tooltip="Switch Log File and Change Logging Parameters is not supported below Postgres 9.4" tooltip-enable="selectComp == 'pg93' || selectComp == 'pg92'">
+                            <button class="btn btn-default pull-right" ng-click="openLoggingParam()" ng-disabled="disableLog || selectComp == 'pg93' || selectComp == 'pg92' || pgNotRunning || devRole">
+                            Change logging parameters
+                            </button>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                    <div class="alert alert-warning" ng-if="pgNotRunning" role="alert">
+                                Selected Postgres instance is not running
+                            </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <input type="text" ng-model="logDir" class="form-control" placeholder="Log Dir" ng-disabled="true">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="pull-left"> Select log files &nbsp;<span class="required-symbol">*</span> </div>
+                            <div class="pull-right" ng-click="refreshLogfiles(selectComp)"> <i class="fa fa-refresh fa-fw"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="pg-badger-select-log" ng-model="selectLog">
+                                <div ng-if="refreshMsg"><i class="fa fa-refresh fa-spin fa-fw"></i>Refreshing..</div>
+                                <div ng-repeat="c in logfiles" ng-if="!refreshMsg && selectComp">
+                                    <label>
+                                        <input type="checkbox" name="selectLog" ng-model="c.selected" ng-change="logFileChecked()" value="{{c.log_file}}; {{c.file_size}}">
+                                        <span>&nbsp;{{c.file}}</span>
+                                    </label>
+                                    <span class="pull-right">{{c.file_size}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{c.mtime}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-left col-md-12">
+                        <span class="required-symbol">*</span> Required Field
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+        <div class="box">
+            <div class="box-body">
+                <form>
+                    <div class="form-group">
+                        <input type="text" ng-model="pgTitle"  class="form-control" placeholder="Badger Title">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 col-md-3 col-xs-6 control-label" style="margin-top: 5px;"> Number of jobs :</label>
+                        <div class="col-sm-2 col-md-2 col-xs-2" uib-tooltip="Maximum number of jobs are equivalent to available cores.">
+                            <select ng-model="pgJobs" class="form-control" ng-options="n for n in maxNumJobs">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-actions">
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary"
+                                        ng-disabled="generatingReportSpinner || disableGenrate || !selectComp || !selectedLog"
+                                        ng-click="openGenerateModal()">Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+        <div class="box" ng-if="showReports">
+            <div class="box-header with-border">
+                <div class="col-md-12">
+                    <label>
+                        <input type="checkbox" ng-click="toggleAll()" ng-model="options.master">
+                        Reports
+                    </label>
+                    &nbsp;&nbsp;&nbsp;<button class="btn btn-default" ng-disabled="!options.master && !checked" ng-click="deleteReports(files_list, false)">Delete</button>
+                    <div class="pull-right" ng-click="refreshReports()"> <i class="fa fa-refresh fa-fw"></i></div>
+                    <span class="pull-right"><label>Created on</label></span>
+                </div>
+            </div>
+            <div class="box-body" style="height: 435px; overflow: auto;">
+                <div class="col-md-12" ng-repeat = "option in files_list">
+                    <label>
+                    <input type="checkbox" ng-model="option.selected" ng-change="optionToggled()">
+                    <span>&nbsp;{{ option.file }}</span>
+                    </label>
+                    &nbsp;&nbsp;<a target="_blank" href="{{ option.file_link }}"><i class="fa fa-external-link"></i></a>
+                    <span class="pull-right">{{ option.mtime }}</span>
+                </div>
+            </div>
+            <!-- <div class="box-footer">
+            
+            </div> -->
+        </div>
+    </div>
+    <div ng-show="showBgProcess">
+        <background-process-alert title="Badger"></background-process-alert>
+    </div>
+ </div>
+</section>

@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <!-- <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close"></i>
+    </div> -->
+</div>
+<div class="modal-body">
+<form class="form plProfiler-form">
+    <div class="form-group">
+        Are you sure want to delete selected {{deleteFilesLength}} <span ng-if="comp!='credentials'">file</span><span ng-if="comp=='credentials'">credential</span>(s)?
+    </div>
+</form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-danger" type="button" ng-click="cancel()" ng-if="!deleting">No</button>
+    <button type="submit" class="btn btn-success" ng-if="!deleteCred && !deleting" ng-click="removeReports()">Yes</button>
+    <button type="submit" class="btn btn-success" ng-if="deleteCred && !deleting" ng-click="removeCreds()">Yes</button>
+    <span ng-if="deleting">
+    	<i class="fa fa-cog fa-spin"></i>&nbsp;Deleting...
+    </span>
+</div>

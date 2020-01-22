@@ -1,0 +1,519 @@
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <!-- <server-info-details title="Connection Details"></server-info-details> -->
+    <div class="components-update-title-wrapper">
+        <form class="form form-inline ">
+            <h1 style="float:left; display: inline; padding-right: 10px;"><strong>PostgreSQL Connection Details</strong></h1>
+            <select class="form-control" id="serverInfoDropDown" ng-change="connChange(selectConn)" ng-model="selectConn">
+                <option ng-repeat="pg in pgList" value="{{ pg.server_name }}">{{pg.db_user}}@{{ pg.host }}:{{ pg.port }}/{{pg.db}}</option> 
+            </select>
+        </form>
+    </div>
+</section>
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div ng-if="loading" style="position: absolute;width: 100px; height: 50px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+            <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+            <span><h3>Loading...</h3></span>
+        </div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-3 col-sm-4 col-xs-12" ng-if="!loading && !showErrormsg">
+            <!-- Profile Image -->
+            <div class="box box-primary">
+                <div class="box-body box-profile">
+                    <div class="comp-det-top">
+                        <div class="col-md-4"><img class="img-responsive comp-logo-img" id="component-logo" ng-src="assets/img/component-logos/pg96.png" err-src="assets/img/component-logos/no_img.png" alt="">
+                        </div>
+                        <div class="col-md-8">
+                            <h4 id="conn_name" style="white-space: nowrap;"> {{connData.server_name}} </h4><span>{{connData.server_group}} </span>
+                        </div>
+                    </div>
+                    <span class="clearfix"></span>
+                    <!-- <div style="text-align: center; padding-bottom: 25px;"><b><a href="" tooltip-append-to-body="true" uib-tooltip="Check out the new features of {{ component.component }}" ng-click="openWhatsNew()"> What's New</a></b></div> -->
+                    <ul class="list-group list-group-unbordered" id="comp_details">
+                        <li class="list-group-item">
+                            <span class="pull-left"><b>Version</b></span> <span class="pull-right" ng-bind="connVersion" id="conn_version"></span>
+                        </li>
+                        <li class="list-group-item" ng-if="up_time">
+                            <span class="pull-left"><b>Uptime</b></span> <span class="pull-right" ng-bind="up_time" id="conn_uptime"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer">
+                            <span class="pull-left"><b>Refresh Interval </b>(sec)</span>
+                            <span class="pull-right"><select class="form-control" id="select-refresh-interval" ng-change="changeOption(opt.interval)" ng-model="opt.interval">
+                            <option ng-repeat="option in optionList" value="{{option.value}}">{{option.label}}</option></select>
+                            </span>
+                        </li>
+                    </ul>
+                    <div ng-show="connData.port" class="text-center">
+                        <h4>
+                            <span ng-if="!connectionStatus" style="color: #FFA500;">Disconnected </span> 
+                            <span ng-if="connectionStatus" style="color: #008000;">Connected </span> 
+                            <br /><small><span>on port {{connData.port}} </span></small>
+                        </h4>
+                    </div>
+                    <div class="text-center">
+                        <button ng-if="!connectionStatus" class="btn btn-default btn-primary" ng-click="openPasswordModal()">Connect</button>
+                        <!-- <button ng-if="connVersion" class="btn btn-default btn-warning">Disconnect</button> -->
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+
+        <div class="col-md-9 col-sm-8 col-xs-12" ng-show="!loading && !showErrormsg" ng-controller="dbGraphsController">
+
+       
+            <div class="nav-tabs-custom" id="comp-details-tabs-wrapper">
+                <uib-tabset>
+                    <uib-tab heading="Dashboard" active="activeOverview.show">
+                        <div class="row tab-content graphsTab" style="padding: 15px;">
+                        <div class="row"> 
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="tpsGraph.open">
+                                      <uib-accordion-heading>
+                                        <span>Transactions per Second
+                                            <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !tpsGraph.open, 'fa fa-minus': tpsGraph.open}"></i>
+                                        </span>
+                                      </uib-accordion-heading>
+                                        <div>
+                                        <nvd3 options="transctionsPerSecondChart" data="commitRollbackData" showLegend="false"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="connGraph.open">
+                                      <uib-accordion-heading>
+                                        <span>Connections
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !connGraph.open, 'fa fa-minus': connGraph.open}"></i>
+                                        </span> 
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="connectionsChart" data="connectionsData" showLegend="false"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="box">
+                                <uib-accordion>
+                                    <uib-accordion-group is-open="rowsGraph.open">
+                                      <uib-accordion-heading>
+                                        <span>Rows per Second
+                                        <i class="pull-right glyphicon" 
+                                ng-class="{'fa fa-plus': !rowsGraph.open, 'fa fa-minus': rowsGraph.open}"></i>
+                                        </span> 
+                                      </uib-accordion-heading>
+                                        <div>
+                                            <nvd3 options="rowsChart" data="rowsData" showLegend="false"></nvd3>
+                                        </div>
+                                    </uib-accordion-group>    
+                                 </uib-accordion>
+                            </div>
+                        </div>
+                        </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Details" ng-if="showRDSdetails">
+                        <div class="row">
+                            <div ng-if="rdsDataNotFound && !rdsDetailsLoading" class="pg-conn-details-tab">
+                                <h3>No Data Found</h3>
+                            </div>
+                            <div ng-if="rdsDetailsLoading" class="pg-conn-details-tab">
+                                <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+                                <span><h3>Loading...</h3></span>
+                            </div>
+                            <div ng-if="!rdsDetailsLoading && !rdsDataNotFound">
+                            <div class="col-md-6">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div><strong> Configuration Details </strong></div>
+                                    </div>
+                                    <form class="form-horizontal" id="pgc-info-box">
+                                       <!--  <div class="form-group">
+                                            <label class="col-sm-5 info-label">ARN </label>
+                                            <span class="col-sm-7 info-text">
+                                                
+                                            </span>
+                                        </div> -->
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Engine </label>
+                                            <span class="col-sm-7 info-text">
+                                                {{rdsInfo.engine}} {{rdsInfo.engine_version}}
+                                            </span>
+                                        </div>
+                                        <!-- <div class="form-group">
+                                            <label class="col-sm-5 info-label">License Model </label>
+                                            <span class="col-sm-7 info-text">
+                                                
+                                            </span>
+                                        </div> -->
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Created Time </label>
+                                            <span class="col-sm-7 info-text" style="white-space: nowrap;">
+                                                {{rdsInfo.create_time}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">DB Name </label>
+                                            <span class="col-sm-7 info-text">
+                                                {{rdsInfo.dbname}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Username </label>
+                                            <span class="col-sm-7 info-text">
+                                                {{rdsInfo.user}}
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                                <br />
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div><strong> Availability and Durability </strong></div>
+                                    </div>
+                                    <form class="form-horizontal" id="pgc-info-box">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">DB Instance Status </label>
+                                            <span class="col-sm-7 info-text">
+                                                <!-- {{rdsInfo.status}} -->
+                                                <div ng-class="{ 'greenText' :rdsInfo.status == 'available'}">{{rdsInfo.status}}</div>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Multi AZ </label>
+                                            <span class="col-sm-7 info-text">
+                                                <div ng-class="{ 'greenText' :rdsInfo.az_is_multi == 'True' , 'redText' : rdsInfo.az_is_multi == 'False'}">{{rdsInfo.az_is_multi == "True" ? "Yes":"No"}}</div>
+                                            </span>
+                                        </div>
+                                        <div class="form-group" ng-if="rdsInfo.az_is_multi == 'True'">
+                                            <label class="col-sm-5 info-label">Secondary Zone </label>
+                                            <span class="col-sm-7 info-text">
+                                                {{rdsInfo.az_secondary}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Automated Backups </label>
+                                            <span class="col-sm-7 info-text">
+                                                <span class="greenText" ng-if="rdsInfo.backup_retention">Enabled ({{rdsInfo.backup_retention}} days)</span>
+                                                <span class="redText" ng-if="!rdsInfo.backup_retention">Disabled</span>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-5 info-label">Latest Restore Time </label>
+                                            <span class="col-sm-7 info-text">
+                                                {{rdsInfo.latest_restorable}} 
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                                <br />
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div><strong> Maintenance Details </strong></div>
+                                    </div>
+                                    <form class="form-horizontal" id="pgc-info-box">
+                                        <div class="form-group">                                            
+                                        <label class="col-sm-7 info-label" style="word-wrap: none">Auto Minor Version Upgrade </label>
+                                            <span class="col-sm-5 info-text">
+                                                <div ng-class="{ 'greenText' : rdsInfo.auto_minor_upgrade == 'True' , 'redText' : rdsInfo.auto_minor_upgrade == 'False'}">{{rdsInfo.auto_minor_upgrade == "True" ? "Yes":"No"}}</div>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-7 info-label">Maintenance Window </label>
+                                            <span class="col-sm-5 info-text">
+                                                {{rdsInfo.maint_window}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-7 info-label">Backup Window </label>
+                                            <span class="col-sm-5 info-text">
+                                                <span class="greenText">{{rdsInfo.backup_window}}</span>
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div><strong> Security and Network </strong></div>
+                                    </div>
+                                    <form class="form-horizontal" id="pgc-info-box">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Availability Zone </label>
+                                            <span class="col-sm-6 info-text">
+                                                {{rdsInfo.az_primary}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">VPC </label>
+                                            <span class="col-sm-6 info-text">
+                                                <a>{{rdsInfo.vpc}}</a>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Publicly Accessible </label>
+                                            <span class="col-sm-6 info-text">
+                                                <div ng-class="{ 'greenText' : rdsInfo.auto_minor_upgrade == 'True' , 'redText' : rdsInfo.publicly_accessible == 'False'}">{{rdsInfo.publicly_accessible == "True" ? "Yes":"No"}}</div>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label"> Endpoint </label>
+                                            <span class="col-sm-6 info-text">
+                                                <a>{{rdsInfo.host}}</a>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Port </label>
+                                            <span class="col-sm-6 info-text">
+                                                {{rdsInfo.port}}
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                                <br />
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div><strong> Instance and IOPS </strong></div>
+                                    </div>
+                                    <form class="form-horizontal" id="pgc-info-box">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Instance Class </label>
+                                            <span class="col-sm-6 info-text" id="rds-meta-info">
+                                                {{rdsInfo.db_class}} &nbsp;<i tooltip-append-to-body="true" uib-tooltip-template="'../app/components/partials/instanceMetaList.html'" class="fa fa-info-circle" aria-hidden="true"></i><span ng-if="rdsInfo.db_class"></span>
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Storage Type </label>
+                                            <span class="col-sm-6 info-text">
+                                                {{rdsInfo.storage_type}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">IOPS </label>
+                                            <span class="col-sm-6 info-text" ng-if="rdsInfo.iops==''">
+                                                disabled
+                                            </span>
+                                            <span class="col-sm-6 info-text" ng-if="rdsInfo.iops!=''">
+                                                {{rdsInfo.iops}}
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label"> Storage </label>
+                                            <span class="col-sm-6 info-text">
+                                                {{rdsInfo.storage_allocated}} GB
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 info-label">Encryption Enabled </label>
+                                            <span class="col-sm-6 info-text">
+                                                <div>{{rdsInfo.storage_encrypted == "True" ? "Yes":"No"}}</div>
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Activity" ng-click="activityTabEvent()">
+                        <div class="row tab-content" style="padding: 10px;" ng-if="!errorOnActivity">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="box" id="activityTab">
+                                    <div class="box-header">
+                                        <h3 class="box-title">PG_STAT_ACTIVITY</h3>
+                                    </div>
+                                    <div class="box-body table-responsive no-padding">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-md-1 col-xs-1"><b>PID</b></th>
+                                                    <th class="col-md-5 col-xs-5"><b>Query</b></th>
+                                                    <th class="col-md-2 col-xs-2"><b>Query Time</b></th>
+                                                    <th class="col-md-2 col-xs-2"><b>DB</b></th>
+                                                    <th class="col-md-1 col-xs-1"><b>User</b></th>
+                                                    <th class="col-md-1 col-xs-1"><b>Cl. Addr.</b></th>
+                                                    
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody ng-show="noActivities == false">
+                                                <tr ng-repeat=" activity in activities">
+                                                    <!-- <div class="row component_box"> -->
+                                                    <td>{{activity.pid}}</td>
+                                                    <td>{{activity.query}}</td>
+                                                    <td>{{activity.query_time}}</td>
+                                                    <td>{{activity.datname}}</td>
+                                                    <td>{{activity.usename}}</td>
+                                                    <td>{{activity.client_addr}}</td>
+                                                    
+                                                    
+                                                    <!-- </div> -->
+                                                </tr>
+                                            </tbody>
+                                            <tbody ng-show="noActivities == true">
+                                                <tr>
+                                                    <td colspan="6">
+                                                        <p class="lead">No Database Activity.</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gridStyle" ng-if="errorOnActivity">{{activityTabError}}</div>
+                    </uib-tab>
+                    <uib-tab heading="Configure" ng-click="configureTabEvent()">
+                        <div ng-if="gridSettings && !errorOnConfig">
+                            <div class="gridStyle" ui-grid-expandable  ui-grid="gridSettings" class="col-md-12 col-sm-12 col-xs-12"></div>
+                        </div>
+                        <div class="gridStyle" ng-if="errorOnConfig">{{configureTabError}}</div>
+                    </uib-tab>
+                    <uib-tab heading="Databases" ng-click="dataBaseTabEvent()">
+                        <div ng-if="gridOptions && !errorOnDatabase">
+                            <div class="gridStyle" ui-grid="gridOptions" class="col-md-12 col-sm-12 col-xs-12"></div>
+                        </div>
+                        <div class="gridStyle" ng-if="errorOnDatabase">{{databaseTabError}}</div>
+                    </uib-tab>
+                    <uib-tab heading="Performance" ng-click="performanceTabEvent()">
+                    <div class="gridStyle">
+                        <div class="box box-primary">
+                            <div class="box-body">
+                                <div class="row">
+                                    <div style="padding-top: 20px;" class="col-md-12 col-sm-12 col-xs-1">
+                                        <a style="margin-right: 10px;" class="btn btn-lg btn-default" tooltip-append-to-body="true" uib-tooltip="{{ component.logdir }}" ng-show="component.logdir != ''" ui-sref="components.componentLog({component:'pgcli'})" ng-click="logdir(component.logdir) ; logdirSelect()" tooltip-class="logDataDirHover">
+                                            <i class="fa fa-file-text-o fa-2x pull-left"></i>
+                                            Log Tailer
+                                        </a>
+
+                                        <a style="margin-right: 10px;" class="btn btn-lg btn-default" ui-sref="components.profiler">
+                                            <i class="bgs bgs-lg bgs-plprofiler pull-left"></i> plProfiler Console
+                                        </a>
+
+                                        <a class="btn btn-lg btn-default" ui-sref="components.badger">
+                                            <i class="bgs bgs-lg bgs-pgbadger pull-left"></i> 
+                                            pgBadger Console
+                                        </a>
+
+                                        <a class="btn btn-lg btn-default" ng-click="showTuningSet()">
+                                            <i class="bgs bgs-lg bgs-dbtune pull-left"></i> 
+                                            Tuning Service
+                                        </a>
+                                    </div>
+                                    <div style="padding-top: 20px;" class="col-md-12 col-sm-12 col-xs-12" ng-if="showTuneData">
+                                        <div>
+                                            <div class="box box-primary">
+                                                <div class="box-header"> <h4>Tune PostgreSQL</h4></div>
+                                                <div class="box-body">
+                                                    <div class="row" style="padding-top: 40px;">
+                                                        <div class="col-md-4 col-sm-4 col-xs-4">
+                                                            <select class="form-control" id="workload" ng-model="workload">
+                                                                <option value="">Workload</option> 
+                                                                <option value="transProcessing">Transaction Processing</option>
+                                                                <option value="ETL">ETL</option>
+                                                                <option value="reporting">Reporting</option>
+                                                            </select>
+                                                            <br>
+                                                            <br>
+                                                            <button class="btn-primary btn center-block">Submit</button>
+                                                        </div>
+                                                        <div class="col-md-8 col-sm-8 col-xs-8">
+                                                           <div class="DBTuneSSHInfo" ng-if="!rdsDetailsLoading">
+                                                                <div class="box box-primary">
+                                                                    <div class="box-header"> <strong>PostgreSQL properties </strong></div>
+                                                                    <div class="box-body">
+                                                                        <div class="row" style="padding: 10px;">
+                                                                            <div>
+                                                                                <form class="form-horizontal" id="pgc-info-box">
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> Instance Class </strong></div>
+                                                                                        <div class="col-sm-8 info-text">:  {{rdsInfo.db_class}}</div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> vCPU </strong></div>
+                                                                                        <div class="col-sm-8 info-text">: {{instanceMetaList[0].v_cpu}} vCPU</div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> Memory </strong></div>
+                                                                                        <div class="col-sm-8 info-text">: {{instanceMetaList[0].memory}} GB </div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> EBS Optimized </strong></div>
+                                                                                        <div class="col-sm-8 info-text">: No </div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> Network Performance </strong></div>
+                                                                                        <div class="col-sm-8 info-text">: {{instanceMetaList[0].network_performance}} </div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> Storage Type  </strong> </div>
+                                                                                        <div class="col-sm-8 info-text">:  {{rdsInfo.storage_type}}</div>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> IOPS </strong> </div>
+                                                                                        <span class="col-sm-8 info-text" ng-if="rdsInfo.iops==''">
+                                                                                                       : disabled
+                                                                                        </span>
+                                                                                        <span class="col-sm-8 info-text" ng-if="rdsInfo.iops!=''">
+                                                                                            : {{rdsInfo.iops}}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-4"> <strong> Storage </strong> </div>
+                                                                                        <div class="col-sm-8 info-text">:  {{rdsInfo.storage_allocated}} GB</div>
+                                                                                    </div>
+                                                                                </form>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                           </div> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </uib-tab>
+                    <uib-tab heading="Release Notes" disable="true">
+                        <div class="gridStyle">
+                            <div class="box box-primary">
+                                <div class="box-body">
+                                    <div class="col-md-12 col-xs-12" style="height: 700px; overflow: scroll;">
+                                        <span ng-bind-html="relnotes"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+        </div>
+        </div>
+    </div>
+</section>

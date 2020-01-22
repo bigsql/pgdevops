@@ -1,0 +1,234 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">Create New EC2 Instance</h4>
+</div>
+<div class="modal-body" class="create-rds-modal">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+    <div ng-if="firstStep && !loading" class="row">
+        <div class="col-md-6">
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Region :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="select-region" ng-class="data.region? '' : 'back-red'" ng-change="regionChange(regionSelect.region)" ng-options="region.region as region.location for region in regions" ng-model="data.region">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Instance Type :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="select-ins-type" ng-class="data.instance_type? '' : 'back-red'" ng-change="typeChange(typeSelect.type)" ng-model="data.instance_type">
+                            <option value="">--select--</option>
+                            <option ng-repeat="type in types" value="{{ type.instance }}">
+                                {{type.instance}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Choose AMI :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="image_id" ng-class="data.image_id? '' : 'back-red'" ng-model="data.image_id">
+                            <option value="ami-ae7bfdb8">CentOS 7</option>
+                            <option value="ami-cd0f5cb6">Ubuntu Server 16.04 LTS</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Instance Name :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" ng-class="instance.name? '' : 'back-red'" id="ins_nmae" ng-model="instance.name">
+                    </div>
+                </div>
+
+            </form>
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Storage </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Size (GiB) :</label>
+                    <div class="col-sm-2">
+                        <input type="number" id="allocStroage" class="form-control" value="{{data.allocated_storage}}" ng-model="data.volume_size" name="">
+                    </div>
+                    <div class="col-sm-2" style="margin-left: -25px; margin-top: 5px;"><strong>GB</strong></div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="Volume size must be greater than zero or the size of the snapshot used. Provisioned IOPS (SSD) volumes must be at least 4 GiB in size." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -45px;"></i> 
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label class="col-sm-4 control-label">Volume Type :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" id="vol-type" ng-model="data.storage_type">
+                            <option value="gp2">General Purpose (SSD)</option>
+                            <option value="io2">Provisioned IOPS (SSD)</option>
+                            <option value="standard">Magnetic</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="General Purpose (SSD) volumes can burst to 3000 IOPS, and deliver a consistent baseline of 3 IOPS/GiB. Provisioned IOPs (SSD) volumes can deliver up to 20000 IOPS, and are best for EBS-optimized instances. Magnetic volumes, previously called standard volumes, deliver 100 IOPS on average, and can burst to hundreds of IOPS." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i> 
+                    </div>
+                </div>
+            </form>
+
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Configure Security Group </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                 <div class="form-group">
+                    <label class="col-sm-4 control-label">Security Group:</label>
+                    <div class="col-sm-7" ng-if="!gettingSecGrps">
+                        <select class="form-control" id="sec-group" ng-class="(data.subnet_id || data.security_group)? '' : 'back-red'" ng-options="grp.groupName as grp.groupName for grp in secgroups" ng-change="data.network_name='';data.subnet_id=''" ng-model="data.security_group">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="gettingSecGrps"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+            </form>
+
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Select Key Pair </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                 <div class="form-group">
+                    <label class="col-sm-4 control-label">Key Pair:</label>
+                    <div class="col-sm-7" ng-if="!gettingKeyPairs">
+                        <select class="form-control" id="keyname" ng-class="data.keyname? '' : 'back-red'" ng-options="keypair.keyName as keypair.keyName for keypair in keypairs" ng-model="data.keyname">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="gettingKeyPairs"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+            </form>
+
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Configure Instance Details </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Number of instances :</label>
+                    <div class="col-sm-2">
+                       <input class="form-control" id="num-instances" ng-model="data.instance_count" type="number" name="">
+                    </div>
+                    <div class="col-sm-1">                             
+                        <i tooltip-append-to-body="true" uib-tooltip="You can choose to launch more than one instance at a time." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i> 
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Network :</label>
+                    <div class="col-sm-7" ng-if="!gettingVpcs">
+                        <select class="form-control" ng-class="(data.subnet_id || data.security_group)? '' : 'back-red'" ng-change="changeSubnet()" ng-options="sub.vpc as sub.vpc for sub in subnets | unique: 'vpc'" ng-model="data.network_name">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1" ng-if="!gettingVpcs">                             
+                        <i tooltip-append-to-body="true" uib-tooltip="Launch your instance into an Amazon Virtual Private Cloud (VPC). You can create a VPC and select your own IP address range, create subnets, configure route tables, and configure network gateways." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i> 
+                    </div>
+                    <div class="col-sm-2" ng-if="gettingVpcs"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Subnet :</label>
+                    <div class="col-sm-7" ng-if="!gettingVpcs">
+                        <select class="form-control" ng-options="sub for sub in subnetGroups" ng-class="(data.subnet_id || data.security_group || !data.network_name)? '' : 'back-red'" ng-disabled="!data.network_name" ng-model="data.subnet_id">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1" ng-if="!gettingVpcs">                             
+                        <i tooltip-append-to-body="true" uib-tooltip="A range of IP addresses in your VPC that can be used to isolate different EC2 resources from each other or from the Internet. Each subnet resides in one Availability Zone." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i> 
+                    </div>
+                    <div class="col-sm-2" ng-if="gettingVpcs"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Auto-assign Public IP :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-model="assign" ng-options="val.v as val.n for val in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="Requests a public IP address from Amazon's public IP address pool, to make your instance reachable from the Internet. In most cases, the public IP address is associated with the instance until it’s stopped or terminated, after which it’s no longer available for you to use. If you require a persistent public IP address that you can associate and disassociate at will, use an Elastic IP address (EIP) instead. You can allocate your own EIP, and associate it to your instance after launch." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">IAM role :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control"  ng-change="versionChange()" ng-model="data.engine_version">
+                            <option></option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="An IAM role automatically deploys AWS credentials to resources that assume it. Select the instance profile that contains the required IAM role. If you created your IAM role using the console, the instance profile has the same name as your IAM role." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Shutdown behavior :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control" ng-options="val as key for (key, val) in shutDownBehaviours" ng-model="data.shutdown_behaviour">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="Specify the instance behavior when an OS-level shutdown is performed. Instances can be either terminated or stopped." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Enable termination protection :</label>
+                    <div class="col-sm-6" style="margin-top: 5px;">
+                        <input type="checkbox" name=""> <span style="font-size: 0.81em;
+    white-space: pre;">Protect against accidental termination</span>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="You can protect instances from being accidentally terminated. Once enabled, you won't be able to terminate this instance via the API or the AWS Management Console until termination protection has been disabled." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Monitoring :</label>
+                    <div class="col-sm-7" style="margin-top: 5px;">
+                        <input type="checkbox" name="" ng-model="data.monitoring.Enabled"> <span style="font-size: 0.81em;
+    white-space: pre;">Enable CloudWatch detailed monitoring</span>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="Enables you to monitor, collect, and analyze metrics about your instances through Amazon CloudWatch. Additional charges apply if you enable this option." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Tenancy :</label>
+                    <div class="col-sm-7">
+                        <select class="form-control"  ng-change="versionChange()" ng-model="data.engine_version">
+                            <option></option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <i tooltip-append-to-body="true" uib-tooltip="You can choose to run your instances on physical servers fully dedicated for your use. The use of host tenancy will request to launch instances onto Dedicated hosts (https://aws.amazon.com/ec2/dedicated-hosts/), while the use of dedicated tenancy will launch instances as Dedicated instances (https://aws.amazon.com/dedicated-instances/). You can launch an instance with a tenancy of host or dedicated into a Dedicated VPC." class="fa fa-info-circle" aria-hidden="true" style="margin-left: -25px;"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            
+        </div>
+        <div class="col-md-6">
+            
+        </div>
+    </div>
+    <div class="row">
+    </div>
+    </div>
+    <div class="alert alert-danger" role="alert" ng-if="showErrMsg">
+        {{errMsg}}
+    </div>
+</div>
+<div class="modal-footer" ng-if="!loading">
+    <div class="pull-right">
+        <button class="btn btn-primary" ng-if="firstStep" ng-disabled="validateFields()" ng-click="createEC2()">
+           <i class="fa fa-spin fa-cog" ng-if="creating"></i> Create
+        </button>
+    </div>
+</div>

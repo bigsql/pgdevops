@@ -1,0 +1,13 @@
+<div class="components-update-title-wrapper">
+    <form class="form form-inline ">
+        <h1 style="float:left; display: inline; padding-right: 10px;"><strong>{{ title }} {{showOnlyLocal}}</strong></h1>
+        <select class="form-control" id="serverInfoDropDown" ng-change="hostChange(selecthost)" ng-model="selecthost">
+            <option ng-repeat="host in hosts" value="{{ host.name }}"><h3>{{ host.name }} </h3>   ({{ host.host }}), {{host.hostInfo.os}}, {{host.hostInfo.mem}} GB, {{ host.hostInfo.cores }} Core(s)</option> 
+        </select>
+    </form>
+   <!--  <h3 class="pull-left" ng-if="data">
+        <strong> OS </strong> : {{ data.os }} 
+        <strong>HW </strong>: {{ data.mem }} GB, {{ data.cores }} x {{ data.cpu }} 
+        <strong>PGC</strong> : {{ data.version }}
+    </h3> -->
+</div>

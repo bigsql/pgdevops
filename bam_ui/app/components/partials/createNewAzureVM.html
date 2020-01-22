@@ -1,0 +1,155 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">Create Azure VM Instance</h4>
+</div>
+<div class="modal-body" class="create-rds-modal">
+    <div ng-if="loading" class="text-center">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+    </div>
+    <div ng-if="firstStep && !loading" class="row">
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Instance Specifications </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Region :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="select-region"  ng-change="regionChange()" ng-model="data.region" ng-options="region.region as region.location for region in regionsList">
+                            <option value="">--select--</option>
+                        </select>
+                        <!-- <select class="form-control" id="select-region"  ng-change="regionChange()" ng-model="data.region">
+                            <option value="">--select--</option>
+                            <option value="southcentralus">South Central US</option>
+                        </select> -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Instance Name :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" placeholder="Name" id="computer_name" ng-model="data.computer_name" ng-change="validateInsName(data.computer_name)" ng-class="instanceNameValid? '' : 'back-red'" uib-tooltip="Instance name should not contain upper case and special characters." placeholder="Name" tooltip-enable="!instanceNameValid"></input>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Instance Type :</label>
+                    <div class="col-sm-8" ng-disabled="!data.region" ng-if="!loadingInsType">
+                        <select class="form-control" ng-disabled="!data.region" id="select-ins-type" ng-change="typeChange(data.vm_size)" ng-model="data.vm_size" ng-options="ins.name as ins.name for ins in ins_types">
+                            <option value="">--select--</option>
+                            <!-- <option value="Basic_A0">Basic_A0</option> -->
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingInsType"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Group Name :</label>
+                    <div class="col-sm-8" ng-if="!loadingResGroups">
+                        <select class="form-control" ng-disabled="!data.region" id="group_name" ng-change="storageChange()" ng-model="data.group_name">
+                            <option value="">--select--</option>
+                            <option ng-repeat="res_group in res_groups" value="{{ res_group.name }}">
+                                {{res_group.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingResGroups"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Storage Account :</label>
+                    <div class="col-sm-8" ng-if="!loadingStorageAccounts">
+                        <select class="form-control" id="group_name" ng-disabled="!data.group_name || res_groups.length < 0" ng-model="data.storage_account">
+                            <option value="">--select--</option>
+                            <option ng-repeat="storage_ac in storageAccounts" value="{{ storage_ac.name }}">
+                                {{storage_ac.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingStorageAccounts"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Operating System :</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="offer" ng-options="sku as sku.offer + ' ' + sku.sku for sku in skuMapping"  ng-change="publisherChange(selectedSku)" ng-model="selectedSku">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Configure Instance Details </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Network :</label>
+                    <div class="col-sm-8" ng-if="!loadingStorageAccounts">
+                        <select class="form-control" id="offer" ng-options="sub.vpc as sub.vpc for sub in subnets"  ng-change="changeSubnet()" ng-model="data.network_name">
+                            <option value="">--select--</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingStorageAccounts"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Subnet :</label>
+                    <div class="col-sm-8" ng-if="!loadingStorageAccounts">
+                         <input type="text" class="form-control" ng-model="data.subnet_name" name="">
+                    </div>
+                    <div class="col-sm-2" ng-if="loadingStorageAccounts"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="box-header create-rds-cat-header"> <strong>Settings </strong></div>
+            </div>
+            <form class="form-horizontal create-rds-modal" name="$root.initForm">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Admin User :</label>
+                    <div class="col-sm-8">
+                        <input type="text" placeholder="Name" class="form-control" id="admin_username" ng-model="data.admin_username" ng-change="validateUserName(data.admin_username)" ng-class="userNameValid ? '' : 'back-red'" uib-tooltip="User name shouldn't contain any special characters or numbers." tooltip-enable="!userNameValid"></input>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Password :</label>
+                    <div class="col-sm-8">
+                        <input type="password" id="password" class="form-control form-control-success" value="{{data.password}}" name="password" ng-model="data.password" placeholder="Password" ng-minLength="12" ng-maxLength="72" required ng-change="validationInputPwdText(data.password)" ng-class="pwdValid? '' : 'back-red'" uib-tooltip="Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character that is not '\', '#', '%' or '-'. Value must be between 12 and 72 characters long." tooltip-enable="!pwdValid" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Confirm Password :</label>
+                    <div class="col-sm-8">
+                        <input type="password" class="form-control" id="password_c" name="password_c" value="{{password_c}}" ng-model="password_c" placeholder="Password" valid-password-c required  />
+                        <p style="color: red;" ng-show="!initForm.password_c.$error.required && initForm.password_c.$error.noMatch && initForm.password.$dirty">Passwords do not match.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            
+        </div>
+        <div class="col-md-6">
+            
+        </div>
+    </div>
+    <div class="row">
+    </div>
+    </div>
+    <div class="alert alert-danger" role="alert" ng-if="showErrMsg">
+        {{errMsg}}
+    </div>
+</div>
+<div class="modal-footer" ng-if="!loading">
+    <div class="pull-left">
+        <div class="pull-left" ng-if="creating">
+            <span> <i class="fa fa-spinner fa-2x  fa-pulse"></i> {{creatingAzureVM}}</span>
+        </div>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-primary" ng-if="firstStep" ng-disabled="creating || !pwdValid || !data.admin_username || !data.group_name || !data.region || !data.computer_name || !data.offer || !data.vm_size || !userNameValid || !instanceNameValid || !($root.initForm.password.$valid && data.password == $root.initForm.password_c.$viewValue)" ng-click="createVM()">
+            Create
+        </button>
+    </div>
+</div>

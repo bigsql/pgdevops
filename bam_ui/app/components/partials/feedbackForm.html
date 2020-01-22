@@ -1,0 +1,41 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <a href="/" class="feedback-header-img"></a>
+    <h4 class="modal-title">pgDevOps Email Feedback</h4>
+</div>
+<div class="modal-body">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">To:</label>
+            <div class="col-sm-10">
+                <input type="text" id="to_email" class="form-control" ng-model="to_email" ng-disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">From:</label>
+            <div class="col-sm-10">
+                <input type="text" id="from_email" class="form-control" ng-model="from_email" placeholder="Email" ng-disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Subject:</label>
+            <div class="col-sm-10">
+                <input type="text" id="lab_name" class="form-control" ng-model="subject" name="" placeholder="Subject">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Feedback:</label>
+            <div class="col-sm-10">
+                <textarea style="height: 200px;" id="feedback_text" ng-model="feedback" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="form-group" ng-if="showSendbtn">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" id="submit_email" class="btn btn-default pull-right" ng-click="sendEmail()" ng-disabled="!feedback || !subject" ng-hide="sendingEmail">Send Email</button>
+              <div ng-if="sendingEmail && !showSendbtn" class="pull-right"><i style="margin-left: 20px;" class='fa fa-spinner fa-2x  fa-pulse'></i> &nbsp;Sending....</div>
+            </div>
+        </div>
+    </form>
+</div>

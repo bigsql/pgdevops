@@ -1,0 +1,92 @@
+<section class="content-header">
+    <server-info-details title="Server Status"></server-info-details>
+</section>
+<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="8000" close="closeAlert()" class="uib-text">{{alert.msg}}</uib-alert>
+<div id="pgcInfoText" class="pull-left"></div>
+<span class="clearfix"></span>
+<section class="content">
+    <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-12">
+            <div ng-if="showMsg" class="jumbotron" style="background-color: #fff; margin-top: 15px; text-align: center;"> 
+                <h4> No PostgreSQL or server components installed.<br \> Visit the <a ui-sref="components.view">Update Manager</a> to install components.</h4>
+            </div>
+            <div class="box" ng-if='showMsg == false'>
+                <div class="box-header with-border">
+                    <h3 class="box-title">Services</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table class="table" id="serversTable">
+                        <thead>
+                            <tr>
+                                <th class="col-md-3 col-xs-3">Component</th>
+                                <th class="col-md-5 col-xs-5">Status</th>
+                                <th class="col-md-1 col-xs-1"></th>
+                                <th class="col-md-3 col-xs-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serversTableBody">
+                            <tr ng-repeat="comp in comps" ng-if="comp.component != 'devops'">
+                                <td class="col-md-3 col-xs-3">
+                                    <div ng-if="comp.category != 1">
+                                         <a ui-sref="components.detailsView({component:comp.component}) ">
+                                                {{comp.component}}
+                                            </a>
+                                    </div>
+                                    <div ng-if="comp.category == 1">
+                                         <a ui-sref="components.detailspg95({component:comp.component}) ">
+                                                {{comp.component}}
+                                            </a>
+                                    </div>
+                                </td>
+                                <td class="col-md-5 col-xs-5"><i ng-class="statusColors[comp.state]" style="margin-top:2px;margin-right:10px" class="fa fa-stop fa-2x pull-left"></i>
+                                    <div style="margin-top: 5px" ng-show="comp.port">{{comp.state}} on port {{comp.port}}</div>
+                                    <div style="margin-top: 5px" ng-show="!comp.port">{{comp.state}}</div>
+                                </td>
+                                <td class="col-md-1 col-xs-1">
+                                    <span ng-show="comp.showingSpinner"><i class='fa fa-spinner fa-2x  fa-pulse'></i></span>
+                                </td>
+                                <td class="col-md-3 col-xs-3" value="{{comp.component}}" ng-click="action($event)">
+                                    <a class="btn btn-default" ng-show="comp.state =='Not Initialized' " ng-click="openInitPopup(comp.component)">Initialize</a>
+                                    <a class="btn btn-default" id="install" ng-show="comp.state =='Stopped'" ng-disabled=" comp.showingSpinner != undefined">Start</a>
+                                    <div class="btn-group" uib-dropdown ng-show="comp.state =='Running'" >
+                                        <button id="split-button" type="button" class="btn btn-default" ng-disabled="{{comp.component=='devops'}}">Action</button>
+                                        <button type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="{{comp.component=='devops'}}">
+                                            <span class="caret"></span>
+                                            <span class="sr-only">Split button!</span>
+                                        </button>
+                                        <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
+                                            <li role="menuitem"><a>Stop</a></li>
+                                            <li role="menuitem"><a>Restart</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+            <!-- /.box -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="box">
+            <div class="box-header with-border">
+                    <h3 class="box-title">CPU Load</h3>
+                </div>
+            <nvd3 options="cpuChart" data="cpuData"></nvd3>
+            </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="box">
+            <div class="box-header with-border">
+                    <h3 class="box-title">Disk IO</h3>
+                </div>
+            <nvd3 options="ioChart" data="diskIO"></nvd3>
+            </div>
+        </div>
+    </div>
+</section>

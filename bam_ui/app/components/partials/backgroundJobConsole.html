@@ -1,0 +1,27 @@
+<div class="modal-header">
+    <span>{{ title }} Background Task ID #{{taskID}}</span>
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close"></i>
+    </div>
+</div>
+<div class="modal-body">
+    <div class="box" style="margin-bottom: 3px;">
+    <div ng-if="cmdAllowedTypes.indexOf(process_type) != -1 && procCmd" class="bt-status"><b>Command: </b><br><span style="color:#3c8dbc;">{{procCmd}} </span></div>
+    <div ng-if="procStartTime" class="bt-start-time"><b>Start time: </b>{{procStartTime}} </div>
+    </div>
+    <div ng-if="out_data" class="bg_job_console" id="bg_console">
+      <br>
+      <ol>
+          <li ng-repeat="out_line in out_data.split('\n') track by $index" ng-if="out_line">
+             &nbsp;{{out_line}}
+          </li>
+      </ol>
+    </div>
+    <div ng-if="out_data==false" class="bg_job_console">
+        Connecting...
+     </div>
+</div>
+<div class="modal-footer">
+    <div ng-if="procStatus" class="bt-status pull-left"><b>Status&nbsp;: <span class={{statusClass}}>{{procStatus}} </span></b></div>
+    <div ng-if="procExecTime" class="bt-exec-time"><b>Execution Time&nbsp;: </b>{{procExecTime}} </div>
+</div>

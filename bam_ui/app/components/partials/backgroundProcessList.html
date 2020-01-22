@@ -1,0 +1,121 @@
+<script type="text/ng-template" id="alert.html">
+    <div class="alert" style="background-color:#fa39c3;color:white;" role="alert">
+        <div ng-transclude></div>
+    </div>
+</script>
+<div class="uib-text" uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+        <div ng-bind-html="alert.msg"></div>
+    </div>
+
+<section class="content-header">
+    <div class="row">
+        <div class="col-sm-2">
+            <h3 class="components-update-title-wrapper">
+                Job Manager
+            </h3>
+        </div>
+        <div class="col-sm-4">
+            <h3 class="components-update-title-wrapper">
+             <select class="form-control" id="processType" ng-model="processType" ng-change="getBGprocessList(processType)">
+                <option ng-repeat="job in jobTypes" value="{{ job.type_value }}"><h3>{{ job.type }}</h3> </option>
+            </select>
+            </h3>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+</section>
+<section class="content">
+    <span ng-if="errorData" style="text-align: center;"> <h4>{{errorData}}</h4> </span>
+    <div ng-if="loading" style="position: absolute;width: 100px; height: 50px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <div class="uib-text" uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+        <div ng-bind-html="alert.msg"></div>
+    </div>
+    <div class="hostmanager-accordian-wrapper" ng-if="!loading">
+        <div class="box container">
+            <!--<uib-accordion close-others="true">
+                <uib-accordion-group is-open="showBackupProcess">
+                    <uib-accordion-heading>
+                        <span class="host-uib-tab-heading">
+                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !showBackupProcess, 'fa fa-minus':showBackupProcess}"></i> &nbsp; <strong> Backup & Restore Process</strong>
+                        </span>
+                     -->
+                    <div class="row" style="padding-bottom: 6px;padding-top: 6px;">
+                        <div class="col-sm-1" style="text-align:center;"><b>Status</b></div>
+                        <div class="col-sm-2"><b>Start Time</b></div>
+                        <div class="col-sm-2"><b>Completed</b></div>
+                        <div class="col-sm-2"><b>Duration</b></div>
+                        <div class="col-sm-5"><b>Command</b></div>
+
+                    </div>
+                    <div style="height: 70vh;overflow: auto;">
+                    <div ng-repeat="process in processList" class="row">
+                        <div class="col-sm-1" style="text-align:center;">
+                            <img ng-src="{{ process.process_completed == true && process.process_failed == false ? '/assets/img/success.png' : process.process_completed == false ? '/assets/img/success.png' : '/assets/img/fail.png'}}"
+                            ng-class="(process.process_completed == true && process.process_failed == false) ? 'process-success' : (process.process_completed == false) ? 'process-success blink-image' : 'process-fail'"
+                            style="height:22px;width:22px;">
+                            </img>
+
+
+                        </div>
+
+                        <!--<div class="col-sm-1" uib-dropdown>
+                            <a ng-class="(process.process_completed == true && process.process_failed == false) ? 'fa fa-circle fa-2x process-success' : (process.process_completed == false) ? 'fa fa-circle fa-2x process-success blink-image' : 'fa fa-circle fa-2x process-fail'" uib-dropdown-toggle>
+                                <span class="caret "></span>
+                                <span class="sr-only ">Split button!</span>
+                            </a>
+                            <ul uib-dropdown-menu role="menu " aria-labelledby="split-button " style="padding-left:3px;">
+                                <li><a href="" ng-click="showConsoleOutput(process.process_log_id)">Console Output</a></li>
+                                <li><a href="">Configure</a></li>
+                                <li><a href="">Re Run</a></li>
+                            </ul>
+                        </div>-->
+                        <div class="col-sm-2" ng-bind="getLocalTime(process.start_time) | date : 'yyyy-MM-dd HH:mm:ss'"></div>
+                        <div class="col-sm-2" ng-bind="getLocalTime(process.end_time) | date : 'yyyy-MM-dd HH:mm:ss'"></div>
+                        <div class="col-sm-2">{{process.execution_time}}</div>
+                        <div class="col-sm-4 ellipses-right-4x" tooltip-append-to-body="true" uib-tooltip="{{getTruncatedCmd(process.cmd)}}" tooltip-placement="bottom" tooltip-class="pgcCmdHover" style="cursor: pointer;"><a ng-click="showConsoleOutput(process.process_log_id)">{{getTruncatedCmd(process.cmd)}}</a></div>
+                    </div></div>
+                <!--</uib-accordion-group>
+
+            </uib-accordion>-->
+        </div>
+    </div>
+    <!--<div ng-show="showBackupBgProcess">
+        <background-job-detail-screen title="Backup Database" ng-if="showBackupBgProcess"></background-job-detail-screen>-->
+
+    <div id="dialog" width="350" title="" data-auto-open="false" data-resizable="true" style="display: none">
+       <div data-role="header" style="padding-right: 20px;word-wrap: break-word;">
+           <b ng-if="cmdAllowedTypes.indexOf(process_type) != -1 && procCmd">Command: </b><span ng-if="cmdAllowedTypes.indexOf(process_type) != -1 && procCmd" style="color:#3c8dbc;">{{procCmd}} </span>
+           <span ng-if="!(cmdAllowedTypes.indexOf(process_type) != -1 && procCmd)">{{ title }} Background Task ID #{{taskID}}</span>
+       </div>
+      <div data-role="body">
+        <div class="">
+            <!--<div ng-if="cmdAllowedTypes.indexOf(process_type) != -1 && procCmd" class="bt-status"><b>Command: </b><br><span style="color:#3c8dbc;">{{procCmd}} </span></div>-->
+            <div ng-if="procStartTime" class="bt-start-time pull-left"><b>Start time: </b>{{procStartTime}} </div>
+            <div ng-if="out_data" class="bt-start-time pull-right"><b>Log File: </b><a href="#/log/{{process_type}}?lid={{taskID}}" style="cursor: pointer;">{{taskID}}</a> </div>
+        </div>
+          <br><hr>
+        <div ng-if="out_data" class="bg_job_console" id="bg_console">
+              <br>
+              <ol>
+                  <li ng-repeat="out_line in out_data.split('\n') track by $index" ng-if="out_line">
+                     &nbsp;{{out_line}}
+                  </li>
+              </ol>
+            </div>
+            <div ng-if="out_data==false" class="bg_job_console">
+                Connecting...
+             </div>
+        </div>
+
+      <div data-role="footer" style="background-color: #fff;">
+        <div ng-if="procStatus" class="bt-status pull-left"><b>Status&nbsp;: <span class={{statusClass}}>{{procStatus}} </span></b></div>
+        <div ng-if="procExecTime" class="bt-exec-time"><b>Execution Time&nbsp;: </b>{{procExecTime}} </div>
+      </div>
+    </div>
+
+</section>
+
+

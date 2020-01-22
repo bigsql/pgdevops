@@ -1,0 +1,274 @@
+<section class="content-header">
+    <h1 class="components-update-title-wrapper">
+        Server Manager
+    </h1>
+    <div class="btn-group pull-right " uib-dropdown ng-if="!loading">
+        <button type="button" class="btn btn-default" uib-dropdown-toggle>
+            Add
+        </button>
+        <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation()" class="btn btn-default " ng-if="group.group!='default'"  uib-dropdown-toggle>
+            <span class="caret "></span>
+            <span class="sr-only ">Split button!</span>
+        </button>
+        <ul uib-dropdown-menu role="menu " aria-labelledby="split-button ">
+            <li><a href="" ng-click="createNewRds()">Create New RDS Instance</a></li>
+            <li><a href="" ng-click="discoverRds('aws', '', 'Discover AWS Postgres RDS')">Discover Existing RDS Instances</a></li>
+            <li><a href="" ng-click="openPGConnModal()">Direct PostgreSQL Connection</a></li>
+            <!--<li><a href="" ng-click="openPGConnGroupModal()">PostgreSQL Group</a></li>-->
+            <li><a href="" ng-click="open()">Managed SSH Host</a></li>
+            <li><a href="" ng-click="openGroupsModal()">Managed SSH Group</a></li>
+        </ul>
+    </div>
+</section>
+
+<span id="components"></span>
+<section class="content">
+    <span ng-if="pgcNotActive" style="text-align: center;"> <h4>{{pgcNotActiveMsg}} </h4> </span>
+    <span ng-if="errorData" style="text-align: center;"> <h4>{{errorData}}</h4> </span>
+    <div ng-if="loading" style="position: absolute;width: 100px; height: 50px; top: 50%;left: 50%; margin-left: -50px; margin-top: -25px;">
+        <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        <span><h3>Loading...</h3></span>
+    </div>
+    <div class="uib-text" uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+        <div ng-bind-html="alert.msg"></div> 
+    </div>
+    <div ng-if="nothingInstalled" class="jumbotron"
+         style="background-color: #fff; margin-top: 15px; text-align: center;"><h3> You haven't registered any
+        hosts.</h3></div>
+    <div class="hostmanager-accordian-wrapper" ng-if="!loading && !errorData && !pgcNotActive">
+        <div class="box">
+            <uib-accordion close-others="true">
+                <uib-accordion-group is-open="showpgList" ng-if="pgListRes.length>0">
+                    <uib-accordion-heading>
+                        <span class="host-uib-tab-heading" ng-click="openPostgresConnGroup(showpgList); closeAllServers()">
+                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !showpgList, 'fa fa-minus':showpgList}"></i> &nbsp; <strong>Direct PostgreSQL Connections</strong>
+                            <button class="btn btn-default pull-right" style="margin-top: -9px; " ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); navTopgAdmin();">Launch pgAdmin</button>
+                        </span>
+                    </uib-accordion-heading>
+                    <div class="col-md-12" ng-controller="dbGraphsController">
+                        <uib-accordion close-others="true">
+                            <uib-accordion-group ng-repeat="(key,value) in pgListRes | groupBy:'server_group'" is-open="serverUib.open">
+                                <uib-accordion-heading>
+                                    <span ng-click="closeAllServers()">
+                                        <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !serverUib.open, 'fa fa-minus': serverUib.open}"></i>
+                                        <div>{{value[0].server_group}} ({{value.length}})</div>
+                                    </span>
+                                </uib-accordion-heading>
+                                <uib-accordion close-others="true">
+                                <uib-accordion-group ng-repeat="serverVal in value" is-open="serverVal.isOpen">
+                                    <uib-accordion-heading>
+                                        <span ng-click="closeAllConnections(serverVal.isOpen, serverVal)" id="{{serverVal.server_name}}">
+                                        <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !serverVal.isOpen, 'fa fa-minus': serverVal.isOpen}"></i>
+                                        <div>{{serverVal.server_name}}, {{serverVal.db_user}}@{{ serverVal.host }}:{{ serverVal.port }}/{{serverVal.db}}</div>
+                                        <div class="pull-right" style="margin-top: -26px">
+                                            <div class="btn-group" uib-dropdown >
+                                                <button id="split-button " type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); openPGConnModal(serverVal)" class="btn btn-default " ng-if="serverVal.isOpen " >Edit Connection</button>
+                                                <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation()" class="btn btn-default " ng-if="serverVal.isOpen " uib-dropdown-toggle>
+                                                    <span class="caret "></span>
+                                                    <span class="sr-only ">Split button!</span>
+                                                </button>
+                                                <ul uib-dropdown-menu role="menu " aria-labelledby="split-button ">
+                                                    <li><a  ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); deletePGConn(serverVal.sid, serverVal.gid)" href="">Delete</a></li>
+                                                </ul>
+                                            </div>
+                                            <button class="btn btn-default" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation();connect_pg(serverVal.sid,serverVal.gid, pg_pwd, connection.savePwd)" ng-if="need_pwd && serverVal.isOpen ">Connect</button>
+                                            <a ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); navToDetails(serverVal.server_name)" 
+                                            class="btn btn-default" class="ng-binding" ng-if="serverVal.isOpen">Details</a>
+                                        </div>
+                                        </span>
+                                    </uib-accordion-heading>
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <strong>{{serverVal.server_group}} : </strong> {{serverVal.server_name}}
+                                        <div ng-if="version"><strong>Version : </strong>{{ version }}</div>
+                                    <div style="padding:0;" class="col-md-12 col-sm-12 col-xs-12">
+                                        <div class="host-perf-viz">
+                                                <h5>Transactions per Second</h5>
+                                            <nvd3 options="transctionsPerSecondChart" data="commitRollbackData" showLegend="false"></nvd3>
+                                        </div>
+                                    </div>
+                                    <div style="padding:0;" class="col-md-12 col-sm-12 col-xs-12">
+                                        <div class="host-perf-viz">
+                                                <h5>Connections</h5>
+                                            <nvd3 options="connectionsChart" data="connectionsData" showLegend="false"></nvd3>
+                                        </div>
+                                    </div>
+                                </div>
+                                </uib-accordion-group>
+                                </uib-accordion>
+                            </uib-accordion-group>
+                        </uib-accordion>
+                    </div>
+                </uib-accordion-group>
+                <uib-accordion-group ng-repeat="group in groupsList" is-open="group.state"  ng-init="parentIndex = $index" >
+                    <uib-accordion-heading>
+                        <span ng-click="loadGroup($index)" ng-if="group.group == 'default'" class="host-uib-tab-heading">
+                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !group.state, 'fa fa-minus': group.state}"></i> &nbsp; <strong>Managed SSH Hosts</strong>
+                        </span>
+                        <span ng-click="loadGroup($index)" id="{{group.group}}" ng-if="group.group != 'default'" class="host-uib-tab-heading">
+                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !group.state, 'fa fa-minus': group.state}"></i>&nbsp; <strong>{{group.group}}</strong>
+                        </span>
+                            <div class="pull-right" style="margin-top: -10px">
+                                &nbsp;
+                                <div class="btn-group" uib-dropdown >
+                                    <button id="split-button " type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); openGroupsModal($index)" class="btn btn-default " ng-if="group.group!='default'" >Edit Group</button>
+                                    <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation()" class="btn btn-default " ng-if="group.group!='default'" uib-dropdown-toggle>
+                                        <span class="caret "></span>
+                                        <span class="sr-only ">Split button!</span>
+                                    </button>
+                                    <ul uib-dropdown-menu role="menu " aria-labelledby="split-button ">
+                                        <li><a  ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); deleteGroup($index)" href="">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                    </uib-accordion-heading>
+                    <div class="col-md-12">
+                        <div ng-if="group.hosts.length == 0">There are no servers added in this group.</div>
+                        <uib-accordion close-others="true" >
+                            <uib-accordion-group ng-repeat="host in group.hosts" is-open="host.state" ng-init="hostIndex = $index">
+                                <uib-accordion-heading>
+                                        <span ng-click="loadHost(parentIndex, $index, false); stopCalls()" id="{{host.name}}" ng-if="host.host != 'localhost'" class="host-uib-tab-heading"> &nbsp; {{host.name}}  ({{host.host}}),&nbsp;{{host.hostInfo.os}}, {{ host.hostInfo.mem }} GB, {{ host.hostInfo.cores }} Core(s)
+                                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !host.state, 'fa fa-minus': host.state}"></i>
+                                        </span>
+                                        <span ng-click="loadHost(parentIndex, $index, false); stopCalls()" id="{{host.host}}" ng-if="host.host == 'localhost'" class="host-uib-tab-heading"> {{host.host}},&nbsp; {{host.hostInfo.os}}, {{ host.hostInfo.mem }} GB, {{ host.hostInfo.cores }} Core(s)
+                                            <i class="pull-left glyphicon" ng-class="{'fa fa-plus': !host.state, 'fa fa-minus': host.state}"></i>
+                                        </span>
+                                        <div class="pull-right" style="margin-top: -10px">
+                                            &nbsp;
+                                            <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); loadHost(parentIndex,$index,true)" class="btn btn-default" ng-if="host.state">Refresh</button>&nbsp;
+                                            <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); UpdateManager($index)" class="btn btn-default" ng-if="host.state" class="ng-binding" href="" >Package Manager</button>&nbsp;
+                                            <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); showTop($index)" class="btn btn-default" ng-if="host.state" class="ng-binding" href="">Top</button>&nbsp;
+                                            <div class="btn-group" uib-dropdown >
+                                                <button id="split-button " type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); open(parentIndex, $index, host.cred_name)" class="btn btn-default " ng-if="host.host!='localhost'" >Edit Host</button>
+                                                <button type="button" ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation()" class="btn btn-default " ng-if="host.host!='localhost'"  uib-dropdown-toggle>
+                                                    <span class="caret "></span>
+                                                    <span class="sr-only ">Split button!</span>
+                                                </button>
+                                                <ul uib-dropdown-menu role="menu " aria-labelledby="split-button ">
+                                                    <li><a  ng-click="$event.stopPropagation();$event.preventDefault();openNewLocation(); deleteHost($index)" href="">Delete</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                </uib-accordion-heading>
+                                <div ng-if="hostState.active">
+                                <div class="col-md-7 col-sm-12 col-xs-12" ng-if="host.hostInfo.home">
+
+                                    <!-- <span style="float: right;" ng-click="loadHost(parentIndex, $index,true)">
+
+
+                                    </span> -->
+
+                                    <p><strong>PGC : </strong>{{ host.hostInfo.version }} {{ host.hostInfo.home }}</p>
+
+                                    <p>
+                                    <div style="padding:0;" class="col-md-12 col-sm-12 col-xs-12" ng-click="openGraphModal('CPU Load')">
+                                        <div class="host-perf-viz">
+                                                <h5>CPU Load</h5>
+                                            <nvd3 options="cpuChart" data="cpuData" showLegend="false"></nvd3>
+                                        </div>
+                                    </div>
+                                    <div style="padding:0;" class="col-md-12 col-sm-12 col-xs-12" ng-click="openGraphModal('Disk IO')">
+                                        <div class="host-perf-viz">
+                                                <h5>Disk IO</h5>
+                                            <nvd3 options="ioChart" data="diskIO" showLegend="false"></nvd3>
+                                        </div>
+                                    </div>
+                                    <!-- <div style="padding:0;" class="col-md-4 col-sm-6 col-xs-12" ng-click="openGraphModal('Network IO')">
+                                        <div class="host-perf-viz">
+                                                <h5>Network IO</h5>
+                                            <nvd3 options="networkChart" data="NetworkIO" showLegend="false"></nvd3>
+                                        </div>
+                                    </div> -->
+                                    </p>
+                                </div>
+
+                                <div ng-if="hostStatus">
+                                    <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+                                    <span><h3>Loading...</h3></span>
+                                </div> 
+                                <span ng-if="retry" style="text-align: center;"> <h4>Cannot connect to PGC. Retrying connection ... </h4> </span>
+
+                                <div class="col-md-5 col-sm-12 col-xs-12" ng-if="host.comps && !hostStatus">
+                                    <div ng-if="host.showMsg" class="jumbotron"
+                                         style="background-color: #fff; margin-top: 15px; text-align: center;">
+                                        <h4> No PostgreSQL or server components installed.<br \> Visit the <a ng-click="UpdateManager($index)" href="">Package Manager</a> to install components.</h4>
+                                    </div>
+                                    <div class="box" ng-if='host.showMsg == false'>
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">Services</h3>
+                                        </div>
+                                        <div class="box-body">
+                                            <table class="table" id="serversTable">
+                                                <thead>
+                                                <tr>
+                                                    <th class="col-md-2 col-xs-2">Component</th>
+                                                    <th class="col-md-6 col-xs-6">Status</th>
+                                                    <!-- <th class="col-md-1 col-xs-1"></th> -->
+                                                    <th class="col-md-3 col-xs-3">Actions</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="serversTableBody">
+                                                <tr ng-repeat="comp in host.comps" ng-if="comp.component != 'pgdevops'">
+                                                    <td class="col-md-1 col-xs-2">
+                                                        <div ng-if="comp.category != 1">
+                                                            <a ng-click="changeHost(host.name); openDetailsModal(comp.component)">
+                                                                {{ comp.component }}
+                                                            </a>
+                                                        </div>
+                                                        <div ng-if="comp.category == 1">
+                                                            <a ui-sref="components.detailspg95({component:comp.component}) " ng-click="changeHost(host.name)">
+                                                                {{ comp.component }}
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                    <td class="col-md-6 col-xs-6" style="white-space: nowrap;">
+                                                        <!-- <i ng-class="statusColors[comp.state]" style="margin-top:2px;margin-right:10px" class="fa fa-stop fa-2x pull-left" ng-hide="comp.showingSpinner"></i> -->
+                                                        <div style="margin-top: 5px" ng-show="comp.port && !comp.showingSpinner" ng-class="{'greenText' : comp.state == 'Running', 'redText' : comp.state != 'Running'}">{{ comp.state }} on port {{ comp.port }}</div>
+                                                        <div style="margin-top: 5px; color: #FF8C00;" ng-show="!comp.port">{{ comp.state }}</div>
+                                                        <span ng-show="comp.showingSpinner">
+                                                            <i class='fa fa-spinner fa-2x  fa-pulse'></i>
+                                                        </span>
+                                                    </td>
+                                                    <!-- <td class="col-md-1 col-xs-1">
+                                                        <span ng-show="comp.showingSpinner"><i
+                                                                class='fa fa-spinner fa-2x  fa-pulse'></i></span>
+                                                    </td> -->
+                                                    <td class="col-md-5 col-xs-3" value="{{ comp.component }}" ng-click="action( $event, host.host, host.name)">
+                                                        <a class="btn btn-default" ng-show="comp.state =='Not Initialized' " ng-click="openInitPopup(comp.component)"
+                                                           ng-disabled=" comp.showingSpinner != undefined">Initialize</a>
+                                                        <a class="btn btn-default" id="install" ng-show="comp.state =='Stopped'"
+                                                           ng-disabled=" comp.showingSpinner != undefined">Start</a>
+
+                                                        <div class="btn-group" uib-dropdown ng-show="comp.state =='Running'">
+                                                            <button id="split-button" type="button" class="btn btn-default"
+                                                                    ng-disabled=" comp.showingSpinner != undefined">Action
+                                                            </button>
+                                                            <button type="button" class="btn btn-default" uib-dropdown-toggle
+                                                                    ng-disabled=" comp.showingSpinner != undefined" ng-click="restartServerCall()">
+                                                                <span class="caret"></span>
+                                                                <span class="sr-only">Split button!</span>
+                                                            </button>
+                                                            <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
+                                                                <li role="menuitem" ng-click="startServerCall(parentIndex, hostIndex )"><a>Stop</a></li>
+                                                                <li role="menuitem" ng-click="startServerCall(parentIndex, hostIndex )"><a>Restart</a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                <div ng-if="!hostState.active">
+                                    {{errorMsg}}
+                                </div>
+                            </uib-accordion-group>
+                        </uib-accordion>
+                    </div>
+                </uib-accordion-group>
+            </uib-accordion>
+        </div>
+    </div>
+
+</section>

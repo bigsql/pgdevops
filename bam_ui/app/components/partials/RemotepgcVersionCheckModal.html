@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <h4 class="modal-title">{{modalTitle}}</h4>
+</div>
+<form class="form-inline" ng-if="!connecting">
+<div class="modal-body">
+  <div ng-if="!errorShow">
+    <span ng-bind-html="modalMsg"></span> &nbsp;
+    <span ng-if="updatingSpinner"><i class="fa fa-spinner fa-2x  fa-pulse"></i></span>
+  </div>
+  <div ng-if="errorShow">
+      <strong>{{errorMsg}}</strong>
+  </div>
+</div>
+<div class="modal-footer" ng-if="!success">
+  <button type="button" id="check-updates" class="btn btn-default pull-right" id="checkNow" ng-click="update()" ng-disabled="updatingSpinner">Update</button>
+</div>
+</form>

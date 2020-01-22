@@ -1,0 +1,240 @@
+<!-- Main content -->
+<div class="modal-body">
+    <div ng-click="cancel()" class="close-modal pull-right" data-dismiss="modal" aria-hidden="true">
+        <i class="fa fa-lg fa-close cursor_pointer"></i>
+    </div>
+    <div class="details-modal" ng-if="!loading">
+        <h4 ng-if="component.component != 'pgdevops'">Component Details</h4>
+        <h4 ng-if="component.component == 'pgdevops'">&nbsp;</h4>
+        <!-- <server-info-details title="Component Details"></server-info-details> -->
+    </div>
+        <div class="uib-text">
+            <div uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert()" dismiss-on-timeout="8000">
+                {{alert.msg }} 
+            </div>
+            <uib-alert ng-repeat="alert in startAlert" type="{{startAlert.type}}" close="closeAlert()">
+                {{alert.msg }} <button class="btn btn-default btn-sm" ng-click="compAction('install'); closeAlert()" >Yes</button> <button class="btn btn-default btn-sm" ng-click="closeAlert()">No</button>
+            </uib-alert>
+        </div>    
+        <div ng-if="loading" style="text-align: center;">
+            <i class="fa fa-cog fa-spin fa-5x fa-fw margin-bottom"></i>
+        </div>
+        <div class="row">
+        <div class="col-md-4 col-xs-4 col-sm-12">
+            <!-- Profile Image -->
+            <div class="box box-primary" ng-if="!loading">
+                <div class="box-body box-profile">
+                    <img class="comp-img ext-img img-responsive" ng-if="component.category != '2'" id="component-logo" ng-src="assets/img/component-logos/{{ component.component }}.png"  err-src="assets/img/component-logos/no_img.png" alt="">
+                    <img class="comp-img ext-img img-responsive" ng-if="component.category == '2'" id="component-logo" ng-src="assets/img/component-logos/{{ component.componentImage }}.png"  err-src="assets/img/component-logos/no_img.png" alt="">
+                    <!-- <h3 class="profile-username text-center" ng-bind="component.disp_name" id="comp_name"></h3> -->
+                    <div class="description-style">
+                            <h5 style="margin-bottom: 4px;">
+                                <a>{{component.disp_name}}</a>
+                            </h5>
+                            <i style="font-size: small;">{{component.release_desc}}</i>
+                        </div>
+                    <ul class="list-group list-group-unbordered" id="comp_details">
+                        <li class="list-group-item" ng-show="component.version != '' && component.version != undefined && component.component !='pgdevops'">
+                            <span class="pull-left"><b>Version</b></span> <span class="pull-right" ng-bind="component.version" id="comp_version"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.version != '' && component.version != undefined && component.component =='pgdevops'">
+                            <span class="pull-left"><b>Install Version</b></span> <span class="pull-right" ng-bind="component.version" id="comp_version"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.home_url != '' && component.home_url != undefined || component.doc_url != '' && component.doc_url != undefined">
+                            <span class="pull-left"><a ng-show="component.home_url != ''" href="{{component.home_url}}" target='_blank'> Homepage <i class="fa fa-external-link"></i> </a></span> <span class="pull-right"> <a ng-show="component.doc_url != ''" href="{{component.doc_url}}" target='_blank'> Documentation <i class="fa fa-external-link"></i> </a> </span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.release_date && component.is_installed != 1 ">
+                            <span class="pull-left"><b>Release Date</b></span> <span class="pull-right" ng-bind="component.release_date" id="dt_added"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.install_date">
+                            <span class="pull-left"><b>Install Date</b></span> <span class="pull-right" ng-bind="component.install_date"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.port != '' && component.port != undefined && component.port != 0 && component.port != 1 && component.component != 'pgdevops'">
+                            <span class="pull-left"><b>Port</b></span> <span class="pull-right" ng-bind="component.port"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.up_time != '' && component.up_time != undefined">
+                            <span class="pull-left"><b>Uptime</b></span> <span class="pull-right" ng-bind="component.up_time"></span>
+                        </li>
+                        <li class="list-group-item" ng-show="component.connections != '' && component.connections != undefined">
+                            <span class="pull-left"><b>Connections</b></span>
+                            <a class="pull-right" ng-bind="component.connections" id="home_url"></a>
+                        </li>
+                        <li class="list-group-item" ng-show="component.datadir != '' && component.datadir != undefined && component.component != 'pgdevops'">
+                            <span class="pull-left"><b>Data Dir</b></span>
+                            <span class="pull-right" ng-bind="component.datadir" id="comp_doc"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.logdir != '' && component.logdir != undefined">
+                            <span class="pull-left"><b>Log Dir</b></span>
+                            <span href="{{component.logdir}}" class="pull-right" ng-bind="component.logdir" id="dt_added"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.data_size != '' && component.data_size != undefined">
+                            <span class="pull-left"><b>Data Size</b></span>
+                            <a class="pull-right" ng-bind="component.data_size" id="dt_added"></a>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.release_date && component.component == 'pgdevops' && component.current_version ">
+                            <span class="pull-left"><b>Upgrade Version</b></span> <span class="pull-right" ng-bind="component.current_version" id="dt_added"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.release_date && component.component == 'pgdevops' && component.current_version ">
+                            <span class="pull-left"><b>Release Date</b></span> <span class="pull-right" ng-bind="component.release_date" id="dt_added"></span>
+                        </li>
+                        <li class="list-group-item" id="li-pointer" ng-show="component.status != '' && component.status != undefined && component.port != 1 &&  component.component != 'pgdevops'">
+                            <span class="pull-left"><b>State</b></span>
+                            <span class="pull-right" style="margin-top: -4px;"><i ng-class="statusColors[component.status]" class="fa fa-stop fa-2x"></i>
+                                <div style="margin-left: 30px; margin-top: -24px;"> {{component.status}}</div>
+                            </span>
+                        </li>
+                    </ul>
+                    <div id="button-act" ng-click="action($event)" ng-if="component.component != 'pgdevops' && !devRole">
+                        <a ng-show="component.status == undefined && component.is_installed == 0" action="install" class="btn btn-default" ng-disabled=" component.installation != undefined">Install</a>
+                        <a ng-show="component.status == 'Stopped' && component.port != 1" action="start" class="btn btn-default" ng-disabled=" component.spinner != undefined">Start</a>
+                        <a ng-if="component.current_version" action="update" class="btn btn-warning" ng-disabled=" component.spinner != undefined || component.installation != undefined">Update v{{component.current_version}}</a>
+                        <a ng-show="(component.status == 'Stopped' && component.is_installed) || (component.is_installed == 1 && component.status == undefined)" action="remove" class="btn btn-default" ng-disabled=" component.spinner != undefined || component.installation != undefined">Remove</a>
+                        <div ng-show="component.status == 'NotInitialized'">
+                            <a class="btn btn-danger" action="init" ng-disabled=" component.spinner != undefined">Initialize</a>
+                            <a class="btn btn-warning" action="remove" ng-disabled=" component.spinner != undefined">Remove</a>
+                        </div>
+                        <div ng-show="component.status == 'Running'">
+                            <a class="btn btn-default" action="stop" ng-disabled=" component.spinner != undefined">Stop</a>
+                            <a class="btn btn-default" action="restart" ng-disabled=" component.spinner != undefined">Restart</a>
+                        </div>
+                    </div>
+                    <br />
+                    <div id="dep_stats">
+                        <div ng-show="component.installation != undefined || component.spinner " style="width:100%;height:auto;">
+                            <div>
+                                <div ng-show="component.installation && !component.installationStart.status" ><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>Installing..</b></div>
+                                <span ng-show="component.spinner"><i class='fa fa-spinner fa-2x  fa-pulse'></i> <b>{{component.spinner}}</b></span>
+                                <div style="margin-left:10px;margin-top:20px" ng-show="component.installationDependents != undefined"><i class="fa fa-refresh fa-spin" style='margin-right:2px'></i><b> Installing dependencies...</b></div>
+                                <br />
+                                <div style="margin-left:10px;margin-top:-10px" ng-show="component.installationStart.status =='start' && component.installationStart.state == 'unpack'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Unpacking </b></div>
+                                <div style="margin-left:10px;margin-top:20px" ng-show="component.installationStart.status =='start' && component.installationStart.state == 'download'"><i class="fa fa-circle-o-notch fa-spin" style='margin-right:2px'></i><b> Downloading </b></div>
+                                </br>
+                                <div ng-show="component.installationRunning != undefined" class="col-md-4 col-xs-4">
+                                    file:<br \>{{component.installationStart.file}}
+                                </div>
+                                <div class="col-md-4 col-xs-4" ng-show="component.installationRunning != undefined">
+                                    <progressbar value="component.progress"></progressbar>
+                                    <button class="btn btn-default btn-xs center-block" ng-click="cancelInstallation('cancelInstall') " style="margin-top: 5px;">Cancel</button>
+                                </div>
+                                <div class="col-md-2 col-xs-2" ng-show="component.installationRunning != undefined">
+                                    {{component.installationRunning.pct}}%
+                                </div>
+                                <div class="col-md-2 col-xs-2" ng-show="component.installationRunning != undefined">
+                                    {{component.installationRunning.mb}}
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div id="stats">
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+        <div class="col-md-8 col-xs-8 col-sm-12" ng-if="!loading">
+            <uib-tabset>
+                <uib-tab heading="Release Notes" class="details-page-tab" select="tabClick($event)">
+                    <div class="col-md-12 details-relnotes">
+                        <span class="details-page-relnotes" ng-bind-html="rel_notes"></span>
+                    </div>
+                </uib-tab>
+                <uib-tab heading="Upgrade Instructions" class="details-page-tab" ng-if="component.component == 'pgdevops' && component.current_version" active="true">
+                    <div class="col-md-12 details-relnotes">
+                        <div ng-if="os != 'Windows'">
+                            <h3></h3>
+                            <ul>
+                                <li>
+                                    <p>Open a terminal window. </p>
+                                </li>
+                                <li>
+                                    <p>Go to the installation directory </p>
+                                    <p style="font-family: monospace;">cd {{PGC_HOME}}</p>
+                                </li>
+                                <li>
+                                    <p>Get the latest update related information</p>
+                                    <p style="font-family: monospace;">./pgc update</p>
+                                </li>
+                                <li>
+                                    <p>Upgrade pgDevOps using the following command </p>
+                                    <p style="font-family: monospace;">./pgc upgrade pgdevops</p>
+                                    <p style="font-style: italic;">The above command may take a couple of minutes based on the speed of the system and network. It shuts down the pgDevOps service, upgrades pgDevOps, and starts the service again.</p>
+                                </li>
+                                <li>
+                                    <p>Verify status of the pgDevOps service</p>
+                                    <p style="font-family: monospace;">&nbsp; ./pgc status pgdevops</p>
+                                    <div class="well">
+                                        <strong><i class="fa fa-lightbulb-o fa-lg" aria-hidden="true"> &nbsp;</i>Other commands you might find useful</strong>
+                                        <br />
+                                        <br />
+                                        <ul>
+                                            <li>
+                                            <p>Start pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; ./pgc start pgdevops</p>
+                                            </li>
+                                            <li>
+                                            <p>Stop pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; ./pgc stop pgdevops</p>
+                                            </li>
+                                            <li>
+                                            <p>Restart pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; ./pgc restart pgdevops</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div ng-if="os == 'Windows'">
+                            <h3></h3>
+                            <ul>
+                                <li>
+                                    <p>Open a command prompt as administrator.</p>
+                                    <img src="assets/img/component-logos/runAsAdmin.png">
+                                </li>
+                                <li>
+                                    <p>Go to the installation directory</p>
+                                    <p style="font-family: monospace;">cd {{PGC_HOME}}</p>
+                                </li>
+                                <li>
+                                    <p>Get the latest update related information</p>
+                                    <p style="font-family: monospace;">pgc update</p>
+                                </li>
+                                <li>
+                                    <p>Upgrade pgDevOps using the following command </p>
+                                    <p style="font-family: monospace;">pgc upgrade pgdevops</p>
+                                    <p style="font-style: italic;">The above command may take a couple of minutes based on the speed of the system and network. It shuts down the pgDevOps service, upgrades pgDevOps, and starts the service again.</p>
+                                </li>
+                                <li>
+                                    <p>Verify status of the pgDevOps service</p>
+                                    <p style="font-family: monospace;">&nbsp; pgc status pgdevops</p>
+                                    <div class="well">
+                                        <strong><i class="fa fa-lightbulb-o fa-lg" aria-hidden="true"> &nbsp;</i>Other commands you might find useful</strong>
+                                        <br />
+                                        <br />
+                                        <ul>
+                                            <li>
+                                            <p>Start pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; pgc start pgdevops</p>
+                                            </li>
+                                            <li>
+                                            <p>Stop pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; pgc stop pgdevops</p>
+                                            </li>
+                                            <li>
+                                            <p>Restart pgDevOps</p>
+                                            <p style="font-family: monospace;">&nbsp; pgc restart pgdevops</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+        </div>
+        <!-- <div class="col-sm-offset-11 col-sm-11" style="padding: 10px">
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        </div> -->
+</div>
