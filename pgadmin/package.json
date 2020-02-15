@@ -84,7 +84,7 @@
     "underscore.string": "^3.3.4",
     "watchify": "~3.9.0",
     "webcabin-docker": "^2.2.2",
-    "yarn": "^1.3.2"
+    "yarn": "^1.22.0"
   },
   "scripts": {
     "linter": "yarn run eslint pgadmin/static/jsx/**/*.jsx pgadmin/static/js/selection/*.js regression/javascript/**/*.jsx regression/javascript/**/*.js *.js",
