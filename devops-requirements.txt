@@ -11,7 +11,7 @@ click==6.6
 crossbar==0.15.0
 cryptography==1.5.2
 django-htmlmin==0.8.0
-ecdsa==0.13
+ecdsa==0.13.3
 enum34==1.1.6
 extras==0.0.3
 Fabric==1.12.0
