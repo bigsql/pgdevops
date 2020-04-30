@@ -4065,9 +4065,9 @@ jquery@1.11.1:
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-1.11.1.tgz#b6ec928590112ebed69e1e49cbfd0025ccd60ddb"
 
-jquery@1.11.2, jquery@>=1.7.0, "jquery@>=1.7.1 <4.0.0", jquery@>=1.8.0, jquery@>=1.9.0, "jquery@^1.8.3 || ^2.0 || ^3.0":
-  version "1.11.2"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-1.11.2.tgz#30ab26857211c37caa83da0f6903155fe49bb72d"
+jquery@3.5.0, jquery@>=1.7.0, "jquery@>=1.7.1 <4.0.0", jquery@>=1.8.0, jquery@>=1.9.0, "jquery@^1.8.3 || ^2.0 || ^3.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.5.0.tgz#9980b97d9e4194611c36530e7dc46a58d7340fc9"
 
 js-base64@^2.1.8, js-base64@^2.1.9:
   version "2.3.2"
@@ -5910,7 +5910,7 @@ react-addons-test-utils@~15.4.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-"react-dom@file:pgadmin/static/vendor/react-dom":
+"react-dom@file:../web/pgadmin/static/vendor/react-dom":
   version "15.4.2"
   dependencies:
     fbjs "^0.8.1"
@@ -5931,7 +5931,7 @@ react-style-proptype@^3.0.0:
   dependencies:
     prop-types "^15.5.4"
 
-"react@file:pgadmin/static/vendor/react":
+"react@file:../web/pgadmin/static/vendor/react":
   version "15.4.2"
   dependencies:
     fbjs "^0.8.4"
