@@ -9,7 +9,7 @@ cbor==1.0.0
 cffi==1.8.3
 click==6.6
 crossbar==0.15.0
-cryptography==1.5.2
+cryptography==3.2
 django-htmlmin==0.8.0
 ecdsa==0.13
 enum34==1.1.6
