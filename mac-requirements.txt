@@ -33,7 +33,7 @@ idna==2.1
 importlib==1.0.3
 ipaddress==1.0.17
 itsdangerous==0.24
-Jinja2==2.7.3
+Jinja2==2.11.3
 jsonschema==2.5.1
 linecache2==1.0.0
 lmdb==0.89
