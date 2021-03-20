@@ -17,7 +17,7 @@ Flask-WTF==0.12
 html5lib==1.0b3
 importlib==1.0.3
 itsdangerous==0.24
-Jinja2==2.7.3
+Jinja2==2.11.3
 linecache2==1.0.0
 MarkupSafe==0.23
 passlib==1.6.2
