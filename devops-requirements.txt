@@ -58,7 +58,7 @@ python-dateutil==2.5.0
 python-mimeparse==1.5.1
 PyTrie==0.2
 pytz==2014.10
-PyYAML==3.12
+PyYAML==5.4
 requests==2.11.1
 sdnotify==0.3.1
 service-identity==16.0.0
