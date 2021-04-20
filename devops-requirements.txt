@@ -78,7 +78,7 @@ txaio==2.5.1
 u-msgpack-python==2.1
 unittest2==1.1.0
 watchdog==0.8.3
-Werkzeug==0.9.6
+Werkzeug==0.15.3
 WTForms==2.0.2
 zope.interface==4.3.2
 psutil
