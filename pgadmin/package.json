@@ -75,7 +75,7 @@
     "react-dom": "file:../web/pgadmin/static/vendor/react-dom",
     "react-split-pane": "^0.1.63",
     "requirejs": "~2.3.3",
-    "select2": "^4.0.3",
+    "select2": "^4.0.6",
     "shim-loader": "^1.0.1",
     "slickgrid": "git+https://github.com/6pac/SlickGrid.git#2.3.7",
     "snapsvg": "^0.5.1",
