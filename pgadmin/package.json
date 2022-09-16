@@ -50,7 +50,7 @@
     "backgrid-select-all": "^0.3.5",
     "backgrid-sizeable-columns": "^0.1.1",
     "bignumber.js": "^4.0.2",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "bootstrap-datepicker": "^1.7.0",
     "bootstrap-switch": "3.3.2",
     "bowser": "1.6.1",

@@ -1078,9 +1078,9 @@ bootstrap-switch@3.3.2:
   dependencies:
     jquery ">=1.9.0"
 
-bootstrap@^3.3, bootstrap@^3.3.7:
-  version "3.3.7"
-  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.3.7.tgz#5a389394549f23330875a3b150656574f8a9eb71"
+bootstrap@^3.3, bootstrap@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.4.1.tgz#c3a347d419e289ad11f4033e3c4132b87c081d72"
 
 bowser@1.6.1:
   version "1.6.1"
@@ -5910,7 +5910,7 @@ react-addons-test-utils@~15.4.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-"react-dom@file:pgadmin/static/vendor/react-dom":
+"react-dom@file:../web/pgadmin/static/vendor/react-dom":
   version "15.4.2"
   dependencies:
     fbjs "^0.8.1"
@@ -5931,7 +5931,7 @@ react-style-proptype@^3.0.0:
   dependencies:
     prop-types "^15.5.4"
 
-"react@file:pgadmin/static/vendor/react":
+"react@file:../web/pgadmin/static/vendor/react":
   version "15.4.2"
   dependencies:
     fbjs "^0.8.4"
