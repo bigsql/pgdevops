@@ -16,7 +16,7 @@
     "image-webpack-loader": "^3.3.1",
     "jasmine-core": "~2.5.2",
     "jasmine-enzyme": "^3.1.0",
-    "karma": "~1.5.0",
+    "karma": "~6.4.1",
     "karma-babel-preprocessor": "^6.0.1",
     "karma-browserify": "~5.1.1",
     "karma-jasmine": "~1.1.0",
